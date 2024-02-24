@@ -1,0 +1,7 @@
+---
+version: '2'
+services:
+  nginx:
+    image: nginx
+    volumes: ["./configs/nginx/nginx.conf:/etc/nginx/nginx.conf"]
+    ports: ["80:80"]
