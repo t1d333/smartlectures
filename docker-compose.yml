@@ -10,13 +10,21 @@ services:
       - /etc/key.pem:/etc/key.pem
     ports: [80:80, 443:443]
     depends_on: [backend]
-    networks: [backend]
+    networks: [backend, swagger]
   backend:
     container_name: backend
     build:
       context: .
       dockerfile: Dockerfile
     networks: [backend]
+  swagger:
+    container_name: swagger
+    image: swaggerapi/swagger-ui
+    environment: [SWAGGER_JSON=/docs/swagger.yml]
+    volumes: [./docs:/docs]
+    networks: [swagger]
 networks:
   backend:
+    driver: bridge
+  swagger:
     driver: bridge
