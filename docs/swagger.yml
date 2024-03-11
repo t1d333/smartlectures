@@ -6,21 +6,87 @@ info:
     or HTML.
   version: 0.1.9
 servers:
-  - url: http://api.example.com/v1
-    description: Optional server description, e.g. Main (production) server
-  - url: http://staging-api.example.com
-    description: Optional server description, e.g. Internal staging server for testing
+  - url: http://smartlectures.ru/api/v1
+    description: Main server
 paths:
-  /users:
+  /notes:
     get:
-      summary: Returns a list of users.
-      description: Optional extended description in CommonMark or HTML.
+      summary: Список заметок пользователя
+      description: Получение всех заметок созданных пользователем.
       responses:
         '200':  # status code
-          description: A JSON array of user names
+          description:
           content:
             application/json:
               schema:
                 type: array
                 items:
                   type: string
+  /notes/{noteId}:
+    get:
+      summary: Получение заметки по ID
+      description: Получение заметки.
+      responses:
+        '200':
+          description: При успешном запросе возвращается объект заметки с запрошенным идентификатором
+          context: 
+            schema:
+              $ref: '#/components/schemas/Note' 
+        '404':
+          description: Ответ при запросе несуществующей заметки
+    post:
+      summary: Обновление заметки по ID
+      description: Обновление заметки.
+      responses:
+        '204':
+          description: При успешном запросе возвращается объект заметки с запрошенным идентификатором
+          
+    delete:
+      summary: Удаление заметки по ID
+      description: Удаление заметки.
+      responses:
+        '204':
+          description: Ответ при успешном удалении заметки 
+components:
+  schemas:
+    Note:
+      type: object
+      properties:
+        NoteID:
+          type: number
+          format: int32
+          description: ID заметки
+          example: 1337
+          x-isnullable: flase
+        Name:
+          type: string
+          description: |
+            Заголовок заметки
+          example: Test header
+        Body:
+          type: string
+          description: |
+            Тело заметки в формате, который понимает редактор
+          example: Test body
+        CreatedAt:
+          type: string
+          format: date-time
+          description: Дата создания заметки.
+          example: 2017-01-01T00:00:00Z
+        LastUpdate:
+          type: string
+          format: date-time
+          description: Дата последенго изменения заметки.
+          example: 2017-01-01T00:00:00Z
+        ParentDir:
+          type: number
+          format: int32
+          description: ID папки, которой принадлежит заметка
+          x-isnullable: false
+          example: 1337
+        UserID:
+          type: number
+          format: int32
+          description: ID пользователя, которому принадлежит заметка
+          example: 1337
+          x-isnullable: false

@@ -13,3 +13,7 @@ prod:
 	@docker compose up --build -d
 	@rm ./docker-compose.yml
 	@mv ./docker-compose-dev.yml ./docker-compose.yml  
+
+swagger:
+	@docker compose up swagger -d
+	@docker compose up nginx -d
