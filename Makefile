@@ -1,4 +1,4 @@
-.PHONY: build down
+.PHONY: build down prod
 
 
 build:
