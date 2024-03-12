@@ -15,11 +15,12 @@ import (
 
 func main() {
 	router := gin.Default()
-	router.GET("/", func(c *gin.Context) {
+
+	router.GET("/api/v1/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Welcome Gin Server")
 	})
 
-	router.GET("/err", func(ctx *gin.Context) {
+	router.GET("/api/v1/err/", func(ctx *gin.Context) {
 		ctx.AbortWithError(403, errors.New("Test error"))
 	})
 
@@ -29,7 +30,6 @@ func main() {
 	}
 
 	go func() {
-		// service connections
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
