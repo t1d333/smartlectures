@@ -11,7 +11,7 @@ servers:
 paths:
   /notes/overview:
     post:
-      summary: Список информации о заметках пользователя для отображения структуры
+      summary: Информации о заметках пользователя для отображения структуры
       description: Получение информации о заметка для отображения превью
       responses:
         '200':
@@ -89,26 +89,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DirOverview'
+                $ref: '#/components/schemas/Dir'
 components:
   schemas:
     Dir:
-      type: object
-      properties:
-        dirId:
-          type: number
-          format: int32
-          description: Числовой идентификатор папки
-          example: 1337
-          x-isnullable: flase
-        Name:
-          type: string
-          description: |
-            Название папки
-          example: Test dir
-          x-isnullable: false
-    DirOverview:
-      type: Array
+      type: array
       items:
         type: object
         properties:
@@ -126,7 +111,13 @@ components:
           children:
             type: array
             items:
-              $ref: '#/components/schemas/DirOverview'
+              $ref: '#/components/schemas/Dir'
+      example:
+        - dirId: 10
+          name: 'dir1'
+          children:
+  
+        
     Note:
       type: object
       properties:
