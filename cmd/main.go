@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -15,8 +16,11 @@ import (
 func main() {
 	router := gin.Default()
 	router.GET("/", func(c *gin.Context) {
-		time.Sleep(5 * time.Second)
 		c.String(http.StatusOK, "Welcome Gin Server")
+	})
+
+	router.GET("/err", func(ctx *gin.Context) {
+		ctx.AbortWithError(403, errors.New("Test error"))
 	})
 
 	srv := &http.Server{
@@ -32,7 +36,7 @@ func main() {
 	}()
 
 	quit := make(chan os.Signal)
-	
+
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Println("Shutdown Server ...")
@@ -42,7 +46,7 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server Shutdown:", err)
 	}
-	
+
 	select {
 	case <-ctx.Done():
 		log.Println("timeout of 5 seconds.")

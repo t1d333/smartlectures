@@ -9,13 +9,21 @@ servers:
   - url: http://smartlectures.ru/api/v1
     description: Main server
 paths:
-  /notes:
-    get:
-      summary: Список заметок пользователя
-      description: Получение всех заметок созданных пользователем.
+  /notes/overview:
+    post:
+      summary: Список информации о заметках пользователя для отображения структуры
+      description: Получение информации о заметка для отображения превью
       responses:
-        '200':  # status code
-          description:
+        '200':
+          description: abc
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          description: abc
           content:
             application/json:
               schema:
@@ -24,67 +32,137 @@ paths:
                   type: string
   /notes/{noteId}:
     get:
+      parameters:
+        - in: path
+          name: noteId
+          schema:
+            type: integer
+          required: true
+          description: Числовой идентификатор заметки
       summary: Получение заметки по ID
       description: Получение заметки.
       responses:
         '200':
-          description: При успешном запросе возвращается объект заметки с запрошенным идентификатором
-          context: 
-            schema:
-              $ref: '#/components/schemas/Note' 
+          description: При успешном запросе возвращается объект заметки с запрошенным
+            идентификатором
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
         '404':
-          description: Ответ при запросе несуществующей заметки
+          description: Ответ при запросе заметки с несуществующим ID
     post:
+      parameters:
+        - in: path
+          name: noteId
+          schema:
+            type: integer
+          required: true
+          description: Числовой идентификатор заметки
       summary: Обновление заметки по ID
       description: Обновление заметки.
       responses:
         '204':
-          description: При успешном запросе возвращается объект заметки с запрошенным идентификатором
-          
+          description: При успешном запросе возвращается объект заметки с запрошенным
+            идентификатором
     delete:
+      parameters:
+        - in: path
+          name: noteId
+          schema:
+            type: integer
+          required: true
+          description: Числовой идентификатор заметки
       summary: Удаление заметки по ID
       description: Удаление заметки.
       responses:
         '204':
-          description: Ответ при успешном удалении заметки 
+          description: Ответ при успешном удалении заметки
+  /dirs/overview:
+    get:
+      summary: Получение структры папок пользователя
+      description: Получение структры папок пользователя для отображения структуры
+        файлов/папок
+      responses:
+        '200':
+          description: Ответ при успешном выполнении запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirOverview'
 components:
   schemas:
-    Note:
+    Dir:
       type: object
       properties:
-        NoteID:
+        dirId:
           type: number
           format: int32
-          description: ID заметки
+          description: Числовой идентификатор папки
           example: 1337
           x-isnullable: flase
         Name:
           type: string
           description: |
+            Название папки
+          example: Test dir
+          x-isnullable: false
+    DirOverview:
+      type: Array
+      items:
+        type: object
+        properties:
+          dirId:
+            type: number
+            format: int32
+            description: Числовой идентификатор папки
+            example: 1337
+            x-isnullable: flase
+          name:
+            type: string
+            description: Название папки
+            example: TestName
+            x-isnullable: false
+          children:
+            type: array
+            items:
+              $ref: '#/components/schemas/DirOverview'
+    Note:
+      type: object
+      properties:
+        noteID:
+          type: number
+          format: int32
+          description: ID заметки
+          example: 1337
+          x-isnullable: flase
+        name:
+          type: string
+          description: |
             Заголовок заметки
           example: Test header
-        Body:
+        body:
           type: string
           description: |
             Тело заметки в формате, который понимает редактор
           example: Test body
-        CreatedAt:
+        createdAt:
           type: string
           format: date-time
           description: Дата создания заметки.
           example: 2017-01-01T00:00:00Z
-        LastUpdate:
+        lastUpdate:
           type: string
           format: date-time
           description: Дата последенго изменения заметки.
           example: 2017-01-01T00:00:00Z
-        ParentDir:
+        parentDir:
           type: number
           format: int32
           description: ID папки, которой принадлежит заметка
           x-isnullable: false
           example: 1337
-        UserID:
+        userId:
           type: number
           format: int32
           description: ID пользователя, которому принадлежит заметка
