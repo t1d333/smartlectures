@@ -1,6 +1,9 @@
 package service
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/internal/notes"
 	"github.com/t1d333/smartlectures/internal/notes/repository"
@@ -12,28 +15,57 @@ type Service struct {
 	repository repository.Repository
 }
 
-func (Service) CreateNote(note models.Note) error {
-	panic("unimplemented")
+func (s *Service) CreateNote(note models.Note, ctx context.Context) error {
+	err := s.repository.CreateNote(note, ctx)
+	if err != nil {
+		err = fmt.Errorf("failed to create note in notes service: %w", err)
+	}
+
+	return err
 }
 
-func (Service) DeleteNote(noteId int) error {
-	panic("unimplemented")
+func (s *Service) DeleteNote(noteId int, ctx context.Context) error {
+	err := s.repository.DeleteNote(noteId, ctx)
+	if err != nil {
+		err = fmt.Errorf("failed to delete note in notes service: %w", err)
+	}
+
+	return err
 }
 
-func (Service) GetNote(noteId int) (models.Note, error) {
-	panic("unimplemented")
+func (s *Service) GetNote(noteId int, ctx context.Context) (models.Note, error) {
+	note, err := s.repository.GetNote(noteId, ctx)
+	if err != nil {
+		err = fmt.Errorf("failed to get note in notes service: %w", err)
+	}
+
+	return note, err
 }
 
-func (Service) GetNotesOverview(userId int) error {
-	panic("unimplemented")
+func (s *Service) GetNotesOverview(userId int, ctx context.Context) (models.NotesOverview, error) {
+	notes, err := s.repository.GetNotesOverview(userId, ctx)
+	
+	if err != nil {
+		return models.NotesOverview{}, fmt.Errorf(
+			"failed to get notes overview in notes service: %w",
+			err,
+		)
+	}
+
+	return models.NotesOverview{Notes: notes}, nil
 }
 
-func (Service) UpdateNote(noteId int) error {
-	panic("unimplemented")
+func (s *Service) UpdateNote(note models.Note, ctx context.Context) error {
+	err := s.repository.UpdateNote(note, ctx)
+	if err != nil {
+		err = fmt.Errorf("failed to update note in notes service: %w", err)
+	}
+
+	return err
 }
 
 func NewService(logger logger.Logger, repository repository.Repository) notes.Service {
-	return Service{
+	return &Service{
 		logger:     logger,
 		repository: repository,
 	}

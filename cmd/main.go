@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	// "github.com/t1d333/smartlectures/internal/models"
 	notesDel "github.com/t1d333/smartlectures/internal/notes/delivery/http"
 	notesRep "github.com/t1d333/smartlectures/internal/notes/repository/pg"
 	notesServ "github.com/t1d333/smartlectures/internal/notes/service"
@@ -23,6 +23,8 @@ func main() {
 
 	router := gin.Default()
 
+	// TODO: cors settings
+
 	srv := &http.Server{
 		Addr:    ":8000",
 		Handler: router,
@@ -33,20 +35,26 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
-	fmt.Println(os.Getenv("DB_URL"))
+	logger.Infow("creating db connection...")
+
 	pool, err := pgxpool.New(ctx, os.Getenv("DB_URL"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
+		logger.Fatalf("unable to create connection pool: %v\n", err)
 		os.Exit(1)
 	}
 	defer pool.Close()
 
 	tmp := ""
+
+	logger.Infow("checking db connection...")
+
 	err = pool.QueryRow(context.Background(), "select '1'").Scan(&tmp)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		logger.Fatalf("queryRow failed: %v\n", err)
 		os.Exit(1)
 	}
+
+	logger.Infow("db connection successfully")
 
 	// notes service
 	notesRep := notesRep.NewRepository(logger, pool)

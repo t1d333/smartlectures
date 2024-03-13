@@ -1,18 +1,9 @@
 package pg
 
-//     note_id     BIGSERIAL PRIMARY KEY,
-//     name        VARCHAR(256) NOT NULL,
-//     body        TEXT         NOT NULL           DEFAULT '',
-//     created_at  TIMESTAMP                       DEFAULT NOW(),
-//     last_update TIMESTAMP                       DEFAULT NULL,
-//     parent_dir  BIGINT REFERENCES dirs (dir_id) DEFAULT 0,
-//     user_id     BIGINT REFERENCES users (user_id)
-//
-
 const (
 	InsertNewNoteCMD = `
 		INSERT INTO notes(name, body, parent_dir, user_id)
-		VALUES($1, $2, $3);
+		VALUES($1, $2, CASE WHEN $3=0 THEN NULL ELSE $3 END, $4);
 	`
 
 	SelectNoteByIDCMD = `
@@ -23,7 +14,7 @@ const (
 
 	UpdateNoteCMD = `
 		UPDATE notes
-		SET name = $2, body = $3, parent_dir = $4, last_update = NOW()
+		SET name = $2, body = $3, parent_dir = CASE WHEN $4=0 THEN NULL ELSE $4 END, last_update = NOW()
 		WHERE note_id = $1
 	`
 
@@ -32,7 +23,7 @@ const (
 		WHERE note_id = $1
 	`
 
-	GetUserNotes = `
+	SelectUserNotesOverview = `
 		SELECT note_id, name, parent_dir
 		FROM notes
 		WHERE user_id = $1

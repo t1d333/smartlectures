@@ -2,8 +2,10 @@ package http
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/internal/notes"
 	"github.com/t1d333/smartlectures/pkg/logger"
 )
@@ -31,21 +33,85 @@ func (d *Delivery) RegisterHandler() {
 }
 
 func (d *Delivery) GetNote(c *gin.Context) {
-	c.String(http.StatusOK, c.Request.URL.Path)
+	noteIdStr := c.Param("noteId")
+
+	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	} else {
+		note, err := d.service.GetNote(noteId, c.Request.Context())
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, note)
+
+	}
 }
 
 func (d *Delivery) CreateNote(c *gin.Context) {
-	c.String(http.StatusOK, c.Request.URL.Path)
-}
+	note := models.Note{}
 
-func (d *Delivery) GetNotesOverview(c *gin.Context) {
-	c.String(http.StatusOK, c.Request.URL.Path)
+	if err := c.BindJSON(&note); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	if err := d.service.CreateNote(note, c.Request.Context()); err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 func (d *Delivery) DeleteNote(c *gin.Context) {
-	c.String(http.StatusOK, c.Request.URL.Path)
+	noteIdStr := c.Param("noteId")
+
+	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	} else if err := d.service.DeleteNote(noteId, c.Request.Context()); err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+func (d *Delivery) GetNotesOverview(c *gin.Context) {
+	// Is mock
+	userId := 1
+
+	overview, err := d.service.GetNotesOverview(userId, c.Request.Context())
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+
+	c.JSON(http.StatusOK, overview)
 }
 
 func (d *Delivery) UpdateNote(c *gin.Context) {
-	c.String(http.StatusOK, c.Request.URL.Path)
+	note := models.Note{}
+	noteIdStr := c.Param("noteId")
+
+	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	} else {
+		note.NoteId = noteId
+	}
+
+	if err := c.BindJSON(&note); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	if err := d.service.UpdateNote(note, c.Request.Context()); err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

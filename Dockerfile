@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY ./ ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o server ./cmd/main.go 
+RUN CGO_ENABLED=0 GOOS=linux go build -tags=jsoniter -o server ./cmd/main.go 
 
 FROM gcr.io/distroless/base-debian11 AS build-release-stage
 

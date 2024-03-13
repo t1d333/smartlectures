@@ -37,7 +37,10 @@ services:
     image: postgres:16
     ports: [5432:5432]
     volumes:
-      - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./scripts/postgres/init.sql:/docker-entrypoint-initdb.d/init1.sql
+      - ./scripts/postgres/default_user.sql:/docker-entrypoint-initdb.d/init2.sql
+      - ./scripts/postgres/default_dir.sql:/docker-entrypoint-initdb.d/init3.sql
+      - ./scripts/postgres/default_note.sql:/docker-entrypoint-initdb.d/init4.sql
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}

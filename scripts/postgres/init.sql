@@ -8,22 +8,23 @@ CREATE TABLE IF NOT EXISTS users
     surname  VARCHAR(128) DEFAULT ''
 );
 
+
 CREATE TABLE IF NOT EXISTS dirs
 (
     dir_id     BIGSERIAL PRIMARY KEY,
     name       VARCHAR(128) NOT NULL,
-    user_id    BIGINT REFERENCES users (user_id),
-    parent_dir BIGINT REFERENCES dirs (dir_id)
+    user_id    BIGINT REFERENCES users (user_id) NOT NULL,
+    parent_dir BIGINT REFERENCES dirs (dir_id) DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS notes
 (
     note_id     BIGSERIAL PRIMARY KEY,
     name        VARCHAR(256) NOT NULL,
-    body        TEXT         NOT NULL           DEFAULT '',
-    created_at  TIMESTAMP                       DEFAULT NOW(),
-    last_update TIMESTAMP                       DEFAULT NOW(),
-    parent_dir  BIGINT REFERENCES dirs (dir_id) DEFAULT 0,
-    user_id     BIGINT REFERENCES users (user_id)
+    body        TEXT         NOT NULL           DEFAULT '' NOT NULL,
+    created_at  TIMESTAMP                       DEFAULT NOW() NOT NULL,
+    last_update TIMESTAMP                       DEFAULT NOW() NOT NULL,
+    parent_dir  BIGINT REFERENCES dirs (dir_id) DEFAULT NULL,
+    user_id     BIGINT REFERENCES users (user_id) NOT NULL
 
 );
