@@ -17,3 +17,6 @@ prod:
 swagger:
 	@docker compose up swagger -d
 	@docker compose up nginx -d
+
+lint:
+	@golangci-lint run ./...

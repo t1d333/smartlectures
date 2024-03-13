@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS notes
     name        VARCHAR(256) NOT NULL,
     body        TEXT         NOT NULL           DEFAULT '',
     created_at  TIMESTAMP                       DEFAULT NOW(),
-    last_update TIMESTAMP                       DEFAULT NULL,
+    last_update TIMESTAMP                       DEFAULT NOW(),
     parent_dir  BIGINT REFERENCES dirs (dir_id) DEFAULT 0,
     user_id     BIGINT REFERENCES users (user_id)
 
