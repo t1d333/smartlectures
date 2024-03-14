@@ -36,12 +36,12 @@ func (d *Delivery) GetNote(c *gin.Context) {
 	noteIdStr := c.Param("noteId")
 
 	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.Status(http.StatusBadRequest)
 		return
 	} else {
 		note, err := d.service.GetNote(noteId, c.Request.Context())
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			c.Status(http.StatusInternalServerError)
 			return
 		}
 
@@ -54,7 +54,8 @@ func (d *Delivery) CreateNote(c *gin.Context) {
 	note := models.Note{}
 
 	if err := c.BindJSON(&note); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		d.logger.Errorf("failed to decode note: %w", err)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
@@ -86,7 +87,7 @@ func (d *Delivery) GetNotesOverview(c *gin.Context) {
 
 	overview, err := d.service.GetNotesOverview(userId, c.Request.Context())
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.Status(http.StatusInternalServerError)
 	}
 
 	c.JSON(http.StatusOK, overview)
@@ -104,7 +105,8 @@ func (d *Delivery) UpdateNote(c *gin.Context) {
 	}
 
 	if err := c.BindJSON(&note); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		d.logger.Errorf("failed to decode note: %w", err)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
