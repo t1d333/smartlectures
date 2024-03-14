@@ -11,25 +11,16 @@ servers:
 paths:
   /notes/overview:
     post:
-      summary: Информации о заметках пользователя для отображения структуры
+      summary: получение заметок для отображения структуры
       description: Получение информации о заметка для отображения превью
       responses:
         '200':
-          description: abc
+          description: При успешном выполнении запроса возвращается список заметок
+            для превью
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
-        '500':
-          description: abc
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
+                $ref: '#/components/schemas/NotesOverview'
   /notes/{noteId}:
     get:
       parameters:
@@ -114,14 +105,12 @@ components:
               $ref: '#/components/schemas/Dir'
       example:
         - dirId: 10
-          name: 'dir1'
+          name: dir1
           children:
-  
-        
     Note:
       type: object
       properties:
-        noteID:
+        noteId:
           type: number
           format: int32
           description: ID заметки
@@ -159,3 +148,30 @@ components:
           description: ID пользователя, которому принадлежит заметка
           example: 1337
           x-isnullable: false
+    NotePreview:
+      type: object
+      properties:
+        noteId:
+          type: number
+          format: int32
+          description: ID заметки
+          example: 1337
+          x-isnullable: flase
+        name:
+          type: string
+          description: |
+            Заголовок заметки
+          example: Test header
+        parentDir:
+          type: number
+          format: int32
+          description: ID папки, которой принадлежит заметка
+          x-isnullable: false
+          example: 1337
+    NotesOverview:
+      type: object
+      properties:
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotePreview'
