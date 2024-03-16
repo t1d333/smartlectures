@@ -10,13 +10,12 @@ servers:
     description: Main server
 paths:
   /notes/overview:
-    post:
-      summary: получение заметок для отображения структуры
+    get:
+      summary: Получение заметок для отображения структуры
       description: Получение информации о заметка для отображения превью
       responses:
         '200':
-          description: При успешном выполнении запроса возвращается список заметок
-            для превью
+          description: Ответ при успешном выполнении запроса.
           content:
             application/json:
               schema:
@@ -34,7 +33,7 @@ paths:
       description: Получение заметки.
       responses:
         '200':
-          description: При успешном запросе возвращается объект заметки с запрошенным
+          description: Ответ при успешном запросе возвращается объект заметки с запрошенным
             идентификатором
           content:
             application/json:
@@ -54,8 +53,15 @@ paths:
       description: Обновление заметки.
       responses:
         '204':
-          description: При успешном запросе возвращается объект заметки с запрошенным
+          description: Ответ при успешном запросе возвращается объект заметки с запрошенным
             идентификатором
+        '404':
+          description: Ответ при попытке обновления не существующей заметки
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Note'
     delete:
       parameters:
         - in: path
