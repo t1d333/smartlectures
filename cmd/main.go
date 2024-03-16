@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	// "github.com/t1d333/smartlectures/internal/models"
+	"github.com/gin-contrib/cors"
 	notesDel "github.com/t1d333/smartlectures/internal/notes/delivery/http"
 	notesRep "github.com/t1d333/smartlectures/internal/notes/repository/pg"
 	notesServ "github.com/t1d333/smartlectures/internal/notes/service"
@@ -22,6 +23,7 @@ func main() {
 	logger := logger.NewLogger()
 
 	router := gin.Default()
+	router.Use(cors.Default())
 
 	// TODO: cors settings
 
