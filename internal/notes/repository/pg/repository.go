@@ -18,8 +18,8 @@ type Repository struct {
 	pool   *pgxpool.Pool
 }
 
-func (r *Repository) CreateNote(note models.Note, ctx context.Context) error {
-	rows, _ := r.pool.Query(
+func (r *Repository) CreateNote(note models.Note, ctx context.Context) (int, error) {
+	row := r.pool.QueryRow(
 		ctx,
 		InsertNewNoteCMD,
 		note.Name,
@@ -28,14 +28,16 @@ func (r *Repository) CreateNote(note models.Note, ctx context.Context) error {
 		note.UserId,
 	)
 
-	defer rows.Close()
+	// defer rows.Close()
 
-	if err := rows.Scan(); err != nil && !errors.Is(err, pgx.ErrNoRows) {
+	noteId := 0
+
+	if err := row.Scan(&noteId); err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		r.logger.Errorf("failed to create note in repository: %v", err)
-		return fmt.Errorf("failed to create note in repository: %v", err)
+		return noteId, fmt.Errorf("failed to create note in repository: %v", err)
 	}
 
-	return nil
+	return noteId, nil
 }
 
 func (r *Repository) DeleteNote(noteId int, ctx context.Context) error {

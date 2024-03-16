@@ -15,13 +15,13 @@ type Service struct {
 	repository repository.Repository
 }
 
-func (s *Service) CreateNote(note models.Note, ctx context.Context) error {
-	err := s.repository.CreateNote(note, ctx)
+func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error) {
+	noteId, err := s.repository.CreateNote(note, ctx)
 	if err != nil {
 		err = fmt.Errorf("failed to create note in notes service: %w", err)
 	}
 
-	return err
+	return noteId, err
 }
 
 func (s *Service) DeleteNote(noteId int, ctx context.Context) error {
@@ -44,7 +44,6 @@ func (s *Service) GetNote(noteId int, ctx context.Context) (models.Note, error) 
 
 func (s *Service) GetNotesOverview(userId int, ctx context.Context) (models.NotesOverview, error) {
 	notes, err := s.repository.GetNotesOverview(userId, ctx)
-	
 	if err != nil {
 		return models.NotesOverview{}, fmt.Errorf(
 			"failed to get notes overview in notes service: %w",

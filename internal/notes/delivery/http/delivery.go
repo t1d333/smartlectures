@@ -59,11 +59,13 @@ func (d *Delivery) CreateNote(c *gin.Context) {
 		return
 	}
 
-	if err := d.service.CreateNote(note, c.Request.Context()); err != nil {
+	noteId, err := d.service.CreateNote(note, c.Request.Context())
+	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{"noteId": noteId})
 	c.Status(http.StatusNoContent)
 }
 

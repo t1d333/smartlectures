@@ -6,9 +6,25 @@ info:
     or HTML.
   version: 0.1.9
 servers:
-  - url: http://smartlectures.ru/api/v1
+  - url: https://smartlectures.ru/api/v1
     description: Main server
 paths:
+  /notes:
+    post:
+      summary: Создание заметки
+      description: Создание заметки
+      responses:
+        '200':
+          description: Ответ при успешном создании заметки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteCreationResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Note'
   /notes/overview:
     get:
       summary: Получение заметок для отображения структуры
@@ -173,6 +189,14 @@ components:
           format: int32
           description: ID папки, которой принадлежит заметка
           x-isnullable: false
+          example: 1337
+    NoteCreationResponse:
+      type: object
+      properties:
+        noteId:
+          type: number
+          format: int32
+          description: ID заметки
           example: 1337
     NotesOverview:
       type: object

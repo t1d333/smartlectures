@@ -3,7 +3,8 @@ package pg
 const (
 	InsertNewNoteCMD = `
 		INSERT INTO notes(name, body, parent_dir, user_id)
-		VALUES($1, $2, CASE WHEN $3=0 THEN NULL ELSE $3 END, $4);
+		VALUES($1, $2, CASE WHEN $3=0 THEN NULL ELSE $3 END, $4)
+		RETURNING note_id;
 	`
 
 	SelectNoteByIDCMD = `
