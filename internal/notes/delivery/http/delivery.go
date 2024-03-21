@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/t1d333/smartlectures/internal/errors"
 	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/internal/notes"
 	"github.com/t1d333/smartlectures/pkg/logger"
@@ -36,12 +37,12 @@ func (d *Delivery) GetNote(c *gin.Context) {
 	noteIdStr := c.Param("noteId")
 
 	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.Error(errors.BadRequestError)
 		return
 	} else {
 		note, err := d.service.GetNote(noteId, c.Request.Context())
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
+			c.Error(err)
 			return
 		}
 
@@ -61,12 +62,11 @@ func (d *Delivery) CreateNote(c *gin.Context) {
 
 	noteId, err := d.service.CreateNote(note, c.Request.Context())
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
+		c.Error(err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"noteId": noteId})
-	c.Status(http.StatusNoContent)
 }
 
 func (d *Delivery) DeleteNote(c *gin.Context) {
@@ -76,7 +76,7 @@ func (d *Delivery) DeleteNote(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		return
 	} else if err := d.service.DeleteNote(noteId, c.Request.Context()); err != nil {
-		c.Status(http.StatusInternalServerError)
+		c.Error(err)
 		return
 	}
 
@@ -89,7 +89,8 @@ func (d *Delivery) GetNotesOverview(c *gin.Context) {
 
 	overview, err := d.service.GetNotesOverview(userId, c.Request.Context())
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
+		c.Error(err)
+		return
 	}
 
 	c.JSON(http.StatusOK, overview)

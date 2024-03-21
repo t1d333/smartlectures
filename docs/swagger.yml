@@ -1,9 +1,8 @@
 ---
 openapi: 3.0.0
 info:
-  title: Sample API
-  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/)
-    or HTML.
+  title: EasyTex API
+  description: Документация по API EasyTex
   version: 0.1.9
 servers:
   - url: https://smartlectures.ru/api/v1
@@ -20,11 +19,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NoteCreationResponse'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Note'
+      tags: [notes]
   /notes/overview:
     get:
       summary: Получение заметок для отображения структуры
@@ -36,6 +42,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotesOverview'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags: [notes]
   /notes/{noteId}:
     get:
       parameters:
@@ -57,6 +70,17 @@ paths:
                 $ref: '#/components/schemas/Note'
         '404':
           description: Ответ при запросе заметки с несуществующим ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags: [notes]
     post:
       parameters:
         - in: path
@@ -73,11 +97,22 @@ paths:
             идентификатором
         '404':
           description: Ответ при попытке обновления не существующей заметки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Note'
+      tags: [notes]
     delete:
       parameters:
         - in: path
@@ -91,6 +126,72 @@ paths:
       responses:
         '204':
           description: Ответ при успешном удалении заметки
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags: [notes]
+  /dirs:
+    post:
+      summary: Создание папки
+      responses:
+        '200':
+          description: Ответ при успешном выполнении запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirCreationResponse'
+      tags: [dirs]
+  /dirs/{dirId}:
+    post:
+      summary: Обновление папки по ID
+      parameters:
+        - in: path
+          name: dirId
+          schema:
+            type: integer
+          required: true
+          description: Числовой идентификатор папки
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Note'
+      responses:
+        '200':
+          description: Ответ при успешном выполнении запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dir'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags: [dirs]
+    delete:
+      parameters:
+        - in: path
+          name: dirId
+          schema:
+            type: integer
+          required: true
+          description: Числовой идентификатор папки
+      summary: Удаление папки по ID
+      responses:
+        '204':
+          description: Ответ при успешном удалении папки
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags: [dirs]
   /dirs/overview:
     get:
       summary: Получение структры папок пользователя
@@ -103,6 +204,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Dir'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags: [dirs]
+  /attachment/upload:
+    post:
+      responses:
+        '200':
+          description: Ответ при успешном выполнении запроса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  src:
+                    type: string
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
 components:
   schemas:
     Dir:
@@ -190,6 +325,7 @@ components:
           description: ID папки, которой принадлежит заметка
           x-isnullable: false
           example: 1337
+      required: [noteId, name, parentDir]
     NoteCreationResponse:
       type: object
       properties:
@@ -198,6 +334,24 @@ components:
           format: int32
           description: ID заметки
           example: 1337
+      required: [noteId]
+    DirCreationResponse:
+      type: object
+      properties:
+        dirId:
+          type: number
+          format: int32
+          description: ID папки
+          example: 1337
+      required: [noteId]
+    Error:
+      type: object
+      properties:
+        msg:
+          type: string
+          description: Текстовое описание ошибки
+          example: note with this id not found
+      required: [msg]
     NotesOverview:
       type: object
       properties:

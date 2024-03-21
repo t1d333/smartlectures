@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	customErrors "github.com/t1d333/smartlectures/internal/errors"
 	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/internal/notes/repository"
 	"github.com/t1d333/smartlectures/pkg/logger"
@@ -33,8 +34,8 @@ func (r *Repository) CreateNote(note models.Note, ctx context.Context) (int, err
 	noteId := 0
 
 	if err := row.Scan(&noteId); err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		r.logger.Errorf("failed to create note in repository: %v", err)
-		return noteId, fmt.Errorf("failed to create note in repository: %v", err)
+		r.logger.Errorf("failed to create note in repository: %w", err)
+		return noteId, fmt.Errorf("failed to create note in repository: %w", err)
 	}
 
 	return noteId, nil
@@ -50,8 +51,14 @@ func (r *Repository) DeleteNote(noteId int, ctx context.Context) error {
 	defer rows.Close()
 
 	if err := rows.Scan(); err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		r.logger.Errorf("failed to delete note in repository: %v", err)
-		return fmt.Errorf("failed to delete note in repository: %v", err)
+
+		// TODO: добавить центральное логирование
+		r.logger.Errorf("failed to delete note in repository: %w", err)
+
+		// TODO: исправить на custom err
+		return fmt.Errorf("failed to delete note in repository: %w", err)
+	} else if err != nil && errors.Is(err, pgx.ErrNoRows) {
+		return customErrors.ErrNoteNotFound
 	}
 
 	return nil
@@ -64,10 +71,12 @@ func (r *Repository) GetNote(noteId int, ctx context.Context) (models.Note, erro
 
 	parentDir := sql.NullInt32{}
 
-	// TODO: ErrNoRows handling
-	if err := row.Scan(&note.NoteId, &note.Name, &note.Body, &note.CreatedAt, &note.LastUpdate, &parentDir, &note.UserId); err != nil {
-		r.logger.Errorf("failed to get note in repository: %v", err)
-		return note, fmt.Errorf("failed to get note in repository: %v", err)
+	if err := row.Scan(&note.NoteId, &note.Name, &note.Body, &note.CreatedAt, &note.LastUpdate, &parentDir, &note.UserId); err != nil &&
+		!errors.Is(err, pgx.ErrNoRows) {
+		r.logger.Errorf("failed to get note in repository: %w", err)
+		return note, fmt.Errorf("failed to get note in repository: %w", err)
+	} else if err != nil && errors.Is(err, pgx.ErrNoRows) {
+		return note, customErrors.ErrNoteNotFound
 	}
 
 	if parentDir.Valid {
@@ -119,8 +128,10 @@ func (r *Repository) UpdateNote(note models.Note, ctx context.Context) error {
 	defer rows.Close()
 
 	if err := rows.Scan(); err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		r.logger.Errorf("failed to update note in repository: %v", err)
-		return fmt.Errorf("failed to update note in repository: %v", err)
+		r.logger.Errorf("failed to update note in repository: %w", err)
+		return fmt.Errorf("failed to update note in repository: %w", err)
+	} else if err == nil && errors.Is(err, pgx.ErrNoRows) {
+		return customErrors.ErrNoteNotFound
 	}
 
 	return nil
