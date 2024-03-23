@@ -26,8 +26,14 @@ const (
 	`
 
 	SelectUserDirsOverview = `
-		SELECT dir_id, name, parent_dir
+		SELECT dir_id
 		FROM dirs
-		WHERE user_id = $1;
+		WHERE user_id = $1 AND parent_dir IS NULL;
+	`
+
+	SelectSubdirs = `
+		SELECT dir_id 
+		FROM dirs
+		WHERE parent_dir = $1;
 	`
 )

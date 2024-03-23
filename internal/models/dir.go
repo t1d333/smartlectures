@@ -5,4 +5,5 @@ type Dir struct {
 	DirId     int    `json:"dirId"`
 	UserId    int    `json:"userId"`
 	ParentDir int    `json:"parentDir"`
+	Subdirs   []Dir  `json:"subdirs"`
 }

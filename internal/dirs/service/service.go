@@ -43,7 +43,12 @@ func (s *Service) GetDir(dirId int, ctx context.Context) (models.Dir, error) {
 }
 
 func (s *Service) GetDirsOverview(userId int, ctx context.Context) (models.DirsOverview, error) {
-	panic("unimplemented")
+	overview, err := s.repository.GetDirsOverview(userId, ctx)
+	if err != nil {
+		err = fmt.Errorf("failed to get dirs overview in dirs service: %w", err)
+	}
+
+	return overview, err
 }
 
 func (s *Service) UpdateDir(dir models.Dir, ctx context.Context) error {

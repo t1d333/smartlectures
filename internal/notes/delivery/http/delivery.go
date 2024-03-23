@@ -106,9 +106,8 @@ func (d *Delivery) UpdateNote(c *gin.Context) {
 	if noteId, err = strconv.Atoi(noteIdStr); err != nil {
 		c.Error(errors.BadRequestError)
 		return
-	} else {
-	}
-
+	} 
+	
 	if err := c.BindJSON(&note); err != nil {
 		d.logger.Errorf("failed to decode note: %w", err)
 		c.Error(errors.BadRequestError)

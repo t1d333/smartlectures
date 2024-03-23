@@ -84,7 +84,15 @@ func (d *Delivery) DeleteDir(c *gin.Context) {
 }
 
 func (d *Delivery) GetDirsOverview(c *gin.Context) {
-	panic("unimplemented")
+	userId := 1
+
+	overview, err := d.service.GetDirsOverview(userId, c.Request.Context())
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, overview)
 }
 
 func (d *Delivery) UpdateDir(c *gin.Context) {

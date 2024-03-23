@@ -1,5 +1,5 @@
 package models
 
 type DirsOverview struct {
-	dirs []Dir
+	Dirs []Dir `json:"dirs"`
 }

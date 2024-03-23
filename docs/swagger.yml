@@ -158,7 +158,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Note'
+              $ref: '#/components/schemas/Dir'
       responses:
         '200':
           description: Ответ при успешном выполнении запроса
@@ -211,7 +211,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
       tags: [dirs]
-  /attachment/upload:
+  /images/upload:
     post:
       responses:
         '200':
@@ -256,7 +256,14 @@ components:
             description: Название папки
             example: TestName
             x-isnullable: false
-          children:
+          userId:
+            type: number
+            format: int32
+            description: Числовой идентификатор создателя папки
+            example: 1337
+            x-isnullable: flase
+          subdirs:
+            x-isnullable: true
             type: array
             items:
               $ref: '#/components/schemas/Dir'
