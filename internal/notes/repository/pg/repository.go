@@ -29,8 +29,6 @@ func (r *Repository) CreateNote(note models.Note, ctx context.Context) (int, err
 		note.UserId,
 	)
 
-	// defer rows.Close()
-
 	noteId := 0
 
 	if err := row.Scan(&noteId); err != nil && !errors.Is(err, pgx.ErrNoRows) {
@@ -116,7 +114,7 @@ func (r *Repository) GetNotesOverview(
 }
 
 func (r *Repository) UpdateNote(note models.Note, ctx context.Context) error {
-	rows, _ := r.pool.Query(
+	rows := r.pool.QueryRow(
 		ctx,
 		UpdateNoteCMD,
 		note.NoteId,
@@ -125,12 +123,12 @@ func (r *Repository) UpdateNote(note models.Note, ctx context.Context) error {
 		note.ParentDir,
 	)
 
-	defer rows.Close()
+	tmp := 0
 
-	if err := rows.Scan(); err != nil && !errors.Is(err, pgx.ErrNoRows) {
+	if err := rows.Scan(&tmp); err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		r.logger.Errorf("failed to update note in repository: %w", err)
 		return fmt.Errorf("failed to update note in repository: %w", err)
-	} else if err == nil && errors.Is(err, pgx.ErrNoRows) {
+	} else if err != nil && errors.Is(err, pgx.ErrNoRows) {
 		return customErrors.ErrNoteNotFound
 	}
 

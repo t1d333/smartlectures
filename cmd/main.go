@@ -19,6 +19,11 @@ import (
 	notesDel "github.com/t1d333/smartlectures/internal/notes/delivery/http"
 	notesRep "github.com/t1d333/smartlectures/internal/notes/repository/pg"
 	notesServ "github.com/t1d333/smartlectures/internal/notes/service"
+
+	dirsDel "github.com/t1d333/smartlectures/internal/dirs/delivery/http"
+	dirsRep "github.com/t1d333/smartlectures/internal/dirs/repository/pg"
+	dirsServ "github.com/t1d333/smartlectures/internal/dirs/service"
+
 	"github.com/t1d333/smartlectures/pkg/logger"
 )
 
@@ -26,10 +31,11 @@ func main() {
 	logger := logger.NewLogger()
 
 	router := gin.Default()
-	router.Use(cors.Default())
-	router.Use(middl.ErrorHandler)
 
 	// TODO: cors settings
+	router.Use(cors.Default())
+
+	router.Use(middl.ErrorHandler)
 
 	srv := &http.Server{
 		Addr:    ":8000",
@@ -62,12 +68,19 @@ func main() {
 
 	logger.Infow("db connection successfully")
 
-	// notes service
+	// notes
 	notesRep := notesRep.NewRepository(logger, pool)
 	notesServ := notesServ.NewService(logger, notesRep)
 	notesDel := notesDel.NewDelivery(logger, router, notesServ)
 
 	notesDel.RegisterHandler()
+
+	// dirs
+	dirsRep := dirsRep.NewRepository(logger, pool)
+	dirsServ := dirsServ.NewService(logger, dirsRep)
+	dirsDel := dirsDel.NewDelivery(logger, router, dirsServ)
+
+	dirsDel.RegisterHandler()
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

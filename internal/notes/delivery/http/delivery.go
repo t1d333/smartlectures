@@ -56,7 +56,7 @@ func (d *Delivery) CreateNote(c *gin.Context) {
 
 	if err := c.BindJSON(&note); err != nil {
 		d.logger.Errorf("failed to decode note: %w", err)
-		c.Status(http.StatusBadRequest)
+		c.Error(errors.BadRequestError)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (d *Delivery) DeleteNote(c *gin.Context) {
 	noteIdStr := c.Param("noteId")
 
 	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.Error(errors.BadRequestError)
 		return
 	} else if err := d.service.DeleteNote(noteId, c.Request.Context()); err != nil {
 		c.Error(err)
@@ -100,21 +100,25 @@ func (d *Delivery) UpdateNote(c *gin.Context) {
 	note := models.Note{}
 	noteIdStr := c.Param("noteId")
 
-	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
-		c.Status(http.StatusBadRequest)
+	noteId := 0
+	var err error
+
+	if noteId, err = strconv.Atoi(noteIdStr); err != nil {
+		c.Error(errors.BadRequestError)
 		return
 	} else {
-		note.NoteId = noteId
 	}
 
 	if err := c.BindJSON(&note); err != nil {
 		d.logger.Errorf("failed to decode note: %w", err)
-		c.Status(http.StatusBadRequest)
+		c.Error(errors.BadRequestError)
 		return
 	}
 
+	note.NoteId = noteId
+
 	if err := d.service.UpdateNote(note, c.Request.Context()); err != nil {
-		c.Status(http.StatusInternalServerError)
+		c.Error(err)
 		return
 	}
 
