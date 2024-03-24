@@ -6,7 +6,7 @@ services:
     container_name: nginx
     volumes: ['${NGINX_CONFIG_PATH}:/etc/nginx/nginx.conf']
     ports: ['${NGINX_HTTP_PORT}:80']
-    depends_on: [backend]
+    depends_on: [backend, images]
     networks: [backend, swagger]
     restart: always
   backend:
@@ -19,6 +19,17 @@ services:
     networks: [backend]
     depends_on: [postgres, redis]
     restart: always
+  images:
+    container_name: images
+    build:
+      context: .
+      dockerfile: ./cmd/images/Dockerfile
+    ports: [8001:8000]
+    environment: ['CONFIG_PATH=${CONFIG_PATH}', 'PORT=${PORT}}']
+    networks: [backend]
+    volumes:
+      - ./configs/images.yml:/etc/images.yml
+      - ./.aws/:/home/nonroot/.aws
   swagger:
     container_name: swagger
     image: swaggerapi/swagger-ui

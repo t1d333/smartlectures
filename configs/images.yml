@@ -1,0 +1,7 @@
+---
+region: ru-central1
+url: https://storage.yandexcloud.net
+partitionId: yc
+bucket: smartlectures
+port: 8000
+address: localhost

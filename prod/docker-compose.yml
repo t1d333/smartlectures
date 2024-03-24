@@ -9,7 +9,7 @@ services:
       - ${NGINX_SSL_CERT_PATH}:/etc/cert.pem
       - ${NGINX_SSL_KEY_PATH}:/etc/key.pem
     ports: ['${NGINX_HTTP_PORT}:80', '${NGINX_HTTPS_PORT}:443']
-    depends_on: [backend]
+    depends_on: [backend, images]
     networks: [backend, swagger]
     restart: always
   backend:
@@ -21,6 +21,16 @@ services:
     networks: [backend]
     depends_on: [postgres, redis]
     restart: always
+  images:
+    container_name: images
+    build:
+      context: .
+      dockerfile: ./cmd/images/Dockerfile
+    environment: ['CONFIG_PATH=${CONFIG_PATH}', 'PORT=${PORT}}']
+    networks: [backend]
+    volumes:
+      - ./configs/images.yml:/etc/images.yml
+      - ./.aws/:/home/nonroot/.aws
   swagger:
     container_name: swagger
     image: swaggerapi/swagger-ui

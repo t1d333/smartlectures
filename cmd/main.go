@@ -12,9 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	// "github.com/t1d333/smartlectures/internal/models"
 	"github.com/gin-contrib/cors"
-	// "github.com/t1d333/smartlectures/internal/errors"
 	middl "github.com/t1d333/smartlectures/internal/middleware"
 	notesDel "github.com/t1d333/smartlectures/internal/notes/delivery/http"
 	notesRep "github.com/t1d333/smartlectures/internal/notes/repository/pg"
@@ -51,8 +49,7 @@ func main() {
 
 	pool, err := pgxpool.New(ctx, os.Getenv("DB_URL"))
 	if err != nil {
-		logger.Fatalf("unable to create connection pool: %v\n", err)
-		os.Exit(1)
+		logger.Fatal("unable to create connection pool", err)
 	}
 	defer pool.Close()
 
