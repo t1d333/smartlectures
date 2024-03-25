@@ -1,4 +1,4 @@
-.PHONY: build down prod
+.PHONY: build down prod recognizer
 
 
 build:
@@ -20,3 +20,8 @@ swagger:
 
 lint:
 	@golangci-lint run ./...
+
+recognizer:
+	@python3 -m grpc_tools.protoc -Irecognizer=protos \
+  	--python_out=. --pyi_out=. --grpc_python_out=. \
+  	./protos/recognizer.proto

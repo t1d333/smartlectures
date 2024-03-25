@@ -31,6 +31,13 @@ services:
     volumes:
       - ./configs/images.yml:/etc/images.yml
       - ./.aws/:/home/nonroot/.aws
+  recognizer:
+    container_name: recognizer
+    build:
+      context: ./recognizer
+      dockerfile: Dockerfile
+    ports: [8002:50051]
+    networks: [backend]
   swagger:
     container_name: swagger
     image: swaggerapi/swagger-ui

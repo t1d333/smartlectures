@@ -24,3 +24,7 @@ configs/nginx/cert.pem
 configs/nginx/key.pem
 .env
 .aws
+.idea
+recognizer_pb2.py
+recognizer_pb2_grpc.py
+__pycache__
