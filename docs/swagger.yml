@@ -136,6 +136,11 @@ paths:
   /dirs:
     post:
       summary: Создание папки
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dir' 
       responses:
         '200':
           description: Ответ при успешном выполнении запроса
@@ -160,12 +165,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Dir'
       responses:
-        '200':
+        '204':
           description: Ответ при успешном выполнении запроса
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Dir'
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
@@ -203,7 +204,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Dir'
+                $ref: '#/components/schemas/DirsOverview'
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
@@ -238,39 +239,34 @@ paths:
                 image:
                   type: string
                   format: binary
+      tags: [images]
 components:
   schemas:
     Dir:
-      type: array
-      items:
-        type: object
-        properties:
-          dirId:
-            type: number
-            format: int32
-            description: Числовой идентификатор папки
-            example: 1337
-            x-isnullable: flase
-          name:
-            type: string
-            description: Название папки
-            example: TestName
-            x-isnullable: false
-          userId:
-            type: number
-            format: int32
-            description: Числовой идентификатор создателя папки
-            example: 1337
-            x-isnullable: flase
-          subdirs:
-            x-isnullable: true
-            type: array
-            items:
-              $ref: '#/components/schemas/Dir'
-      example:
-        - dirId: 10
-          name: dir1
-          children:
+      type: object
+      properties:
+        dirId:
+          type: number
+          format: int32
+          description: Числовой идентификатор папки
+          example: 1337
+          x-isnullable: flase
+        name:
+          type: string
+          description: Название папки
+          example: TestName
+          x-isnullable: false
+        userId:
+          type: number
+          format: int32
+          description: Числовой идентификатор создателя папки
+          example: 1337
+          x-isnullable: flase
+        subdirs:
+          x-isnullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Dir'
     Note:
       type: object
       properties:
@@ -366,3 +362,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NotePreview'
+    DirsOverview:
+      type: object
+      properties:
+        dirs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dir'
+              
