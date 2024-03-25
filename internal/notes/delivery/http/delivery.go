@@ -30,7 +30,7 @@ func (d *Delivery) RegisterHandler() {
 	d.mux.GET("/api/v1/notes/overview", d.GetNotesOverview)
 	d.mux.POST("/api/v1/notes", d.CreateNote)
 	d.mux.DELETE("/api/v1/notes/:noteId", d.DeleteNote)
-	d.mux.POST("/api/v1/notes/:noteId", d.UpdateNote)
+	d.mux.PUT("/api/v1/notes/:noteId", d.UpdateNote)
 }
 
 func (d *Delivery) GetNote(c *gin.Context) {

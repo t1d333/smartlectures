@@ -30,7 +30,7 @@ func (d *Delivery) RegisterHandler() {
 	d.mux.GET("/api/v1/dirs/overview", d.GetDirsOverview)
 	d.mux.POST("/api/v1/dirs", d.CreateDir)
 	d.mux.DELETE("/api/v1/dirs/:dirId", d.DeleteDir)
-	d.mux.POST("/api/v1/dirs/:dirId", d.UpdateDir)
+	d.mux.PUT("/api/v1/dirs/:dirId", d.UpdateDir)
 }
 
 func (d *Delivery) GetDir(c *gin.Context) {
