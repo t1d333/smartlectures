@@ -10,12 +10,20 @@ import (
 	"github.com/t1d333/smartlectures/pkg/logger"
 )
 
+const (
+	newNoteName = "Новый файл"
+)
+
 type Service struct {
 	logger     logger.Logger
 	repository repository.Repository
 }
 
 func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error) {
+	if note.Name == "" {
+		note.Name = newNoteName
+	}
+
 	noteId, err := s.repository.CreateNote(note, ctx)
 	if err != nil {
 		err = fmt.Errorf("failed to create note in notes service: %w", err)
@@ -37,6 +45,8 @@ func (s *Service) GetNote(noteId int, ctx context.Context) (models.Note, error) 
 	note, err := s.repository.GetNote(noteId, ctx)
 	if err != nil {
 		err = fmt.Errorf("failed to get note in notes service: %w", err)
+	} else if note.RepeatedNum != 0 {
+		note.Name = fmt.Sprintf("%s(%d)", note.Name, note.RepeatedNum)
 	}
 
 	return note, err

@@ -2,18 +2,24 @@ package pg
 
 const (
 	InsertNewDirCMD = `
-		INSERT INTO dirs(name, user_id, parent_dir)
-		VALUES($1, $2, CASE WHEN $3=0 THEN NULL ELSE $3 END)
+		INSERT INTO dirs(name, user_id, parent_dir, repeated_num)
+		VALUES($1, $2, $3, (SELECT COUNT(*) FROM dirs WHERE name = $4 AND parent_dir = $5))
 		RETURNING dir_id;
 	`
-
+	
+	InsertNewDirWithNullParentCMD = `
+		INSERT INTO dirs(name, user_id, repeated_num)
+		VALUES($1, $2, (SELECT COUNT(*) FROM dirs WHERE name = $3 AND parent_dir IS NULL))
+		RETURNING dir_id;
+	`
+	
 	SelectDirByIDCMD = `
-		SELECT dir_id, name, user_id, parent_dir
+		SELECT dir_id, name, user_id, parent_dir, repeated_num
 		FROM dirs
 		WHERE dir_id = $1;
 	`
 
-	UpdateDirCMD= `
+	UpdateDirCMD = `
 		UPDATE dirs
 		SET name = $2, parent_dir = CASE WHEN $3=0 THEN NULL ELSE $3 END
 		WHERE dir_id = $1

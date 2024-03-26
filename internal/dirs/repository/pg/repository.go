@@ -20,13 +20,27 @@ type Repository struct {
 }
 
 func (r *Repository) CreateDir(dir models.Dir, ctx context.Context) (int, error) {
-	row := r.pool.QueryRow(
-		ctx,
-		InsertNewDirCMD,
-		dir.Name,
-		dir.UserId,
-		dir.ParentDir,
-	)
+	var row pgx.Row
+
+	if dir.ParentDir == 0 {
+		row = r.pool.QueryRow(
+			ctx,
+			InsertNewDirWithNullParentCMD,
+			dir.Name,
+			dir.UserId,
+			dir.Name,
+		)
+	} else {
+		row = r.pool.QueryRow(
+			ctx,
+			InsertNewDirCMD,
+			dir.Name,
+			dir.UserId,
+			dir.ParentDir,
+			dir.Name,
+			dir.ParentDir,
+		)
+	}
 
 	dirId := 0
 
@@ -67,7 +81,7 @@ func (r *Repository) GetDir(dirId int, ctx context.Context) (models.Dir, error) 
 
 	parentDir := sql.NullInt32{}
 
-	if err := row.Scan(&result.DirId, &result.Name, &result.UserId, &parentDir); err != nil &&
+	if err := row.Scan(&result.DirId, &result.Name, &result.UserId, &parentDir, &result.RepeatedNum); err != nil &&
 		!errors.Is(err, pgx.ErrNoRows) {
 		r.logger.Errorf("failed to get dir in repository", err)
 		return result, fmt.Errorf("failed to get dir in repository: %w", err)

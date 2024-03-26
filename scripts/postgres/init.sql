@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS dirs
     dir_id     BIGSERIAL PRIMARY KEY,
     name       VARCHAR(128) NOT NULL,
     user_id    BIGINT REFERENCES users (user_id) NOT NULL,
+    repeated_num BIGINT DEFAULT 0,
     parent_dir BIGINT REFERENCES dirs (dir_id) DEFAULT NULL
 );
 
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS notes
     created_at  TIMESTAMP                       DEFAULT NOW() NOT NULL,
     last_update TIMESTAMP                       DEFAULT NOW() NOT NULL,
     parent_dir  BIGINT REFERENCES dirs (dir_id) DEFAULT NULL,
+    repeated_num BIGINT NOT NULL DEFAULT 0,
     user_id     BIGINT REFERENCES users (user_id) NOT NULL
 
 );

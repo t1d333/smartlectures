@@ -20,14 +20,29 @@ type Repository struct {
 }
 
 func (r *Repository) CreateNote(note models.Note, ctx context.Context) (int, error) {
-	row := r.pool.QueryRow(
-		ctx,
-		InsertNewNoteCMD,
-		note.Name,
-		note.Body,
-		note.ParentDir,
-		note.UserId,
-	)
+	var row pgx.Row
+
+	if note.ParentDir == 0 {
+		row = r.pool.QueryRow(
+			ctx,
+			InsertNewNoteWithNullParentCMD,
+			note.Name,
+			note.Body,
+			note.UserId,
+			note.Name,
+		)
+	} else {
+		row = r.pool.QueryRow(
+			ctx,
+			InsertNewNoteCMD,
+			note.Name,
+			note.Body,
+			note.ParentDir,
+			note.UserId,
+			note.Name,
+			note.ParentDir,
+		)
+	}
 
 	noteId := 0
 
@@ -69,7 +84,7 @@ func (r *Repository) GetNote(noteId int, ctx context.Context) (models.Note, erro
 
 	parentDir := sql.NullInt32{}
 
-	if err := row.Scan(&note.NoteId, &note.Name, &note.Body, &note.CreatedAt, &note.LastUpdate, &parentDir, &note.UserId); err != nil &&
+	if err := row.Scan(&note.NoteId, &note.Name, &note.Body, &note.CreatedAt, &note.LastUpdate, &parentDir, &note.UserId, &note.RepeatedNum); err != nil &&
 		!errors.Is(err, pgx.ErrNoRows) {
 		r.logger.Errorf("failed to get note in repository: %w", err)
 		return note, fmt.Errorf("failed to get note in repository: %w", err)

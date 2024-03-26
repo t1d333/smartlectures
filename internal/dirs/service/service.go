@@ -10,12 +10,20 @@ import (
 	"github.com/t1d333/smartlectures/pkg/logger"
 )
 
+const (
+	newDirName = "Новая папка"
+)
+
 type Service struct {
 	logger     logger.Logger
 	repository repository.Repository
 }
 
 func (s *Service) CreateDir(dir models.Dir, ctx context.Context) (int, error) {
+	if dir.Name == "" {
+		dir.Name = newDirName
+	}
+
 	dirId, err := s.repository.CreateDir(dir, ctx)
 	if err != nil {
 		err = fmt.Errorf("failed to create dir in dirs service: %w", err)
@@ -37,6 +45,10 @@ func (s *Service) GetDir(dirId int, ctx context.Context) (models.Dir, error) {
 	dir, err := s.repository.GetDir(dirId, ctx)
 	if err != nil {
 		err = fmt.Errorf("failed to get dir in dirs service: %w", err)
+	}
+
+	if dir.RepeatedNum != 0 {
+		dir.Name = fmt.Sprintf("%s(%d)", dir.Name, dir.RepeatedNum)
 	}
 
 	return dir, err

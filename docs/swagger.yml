@@ -151,6 +151,36 @@ paths:
                 $ref: '#/components/schemas/DirCreationResponse'
       tags: [dirs]
   /dirs/{dirId}:
+    get:
+      summary: Получение папки по ID
+      parameters:
+        - in: path
+          name: dirId
+          schema:
+            type: integer
+          required: true
+          description: Числовой идентификатор папки
+      responses:
+        '200':
+          description: Ответ при успешном выполнении запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dir'
+        '404':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags: [dirs]
+
     put:
       summary: Обновление папки по ID
       parameters:
