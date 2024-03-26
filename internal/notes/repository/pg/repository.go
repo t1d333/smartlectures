@@ -92,6 +92,10 @@ func (r *Repository) GetNote(noteId int, ctx context.Context) (models.Note, erro
 		return note, customErrors.ErrNoteNotFound
 	}
 
+	if note.RepeatedNum != 0 {
+		note.Name = fmt.Sprintf("%s(%d)", note.Name, note.RepeatedNum)
+	}
+	
 	if parentDir.Valid {
 		note.ParentDir = int(parentDir.Int32)
 	}
@@ -111,12 +115,17 @@ func (r *Repository) GetNotesOverview(
 	parentDir := sql.NullInt32{}
 	for rows.Next() {
 		note := models.NotePreview{}
-		if err := rows.Scan(&note.NoteId, &note.Name, &parentDir); err != nil {
+		repeatedNum := 0
+		if err := rows.Scan(&note.NoteId, &note.Name, &parentDir, &repeatedNum); err != nil {
 			r.logger.Errorf("failed to scan user note preview in notes repository: %w", err)
 			return overview, fmt.Errorf(
 				"failed to scan user note preview in notes repository: %w",
 				err,
 			)
+		}
+
+		if repeatedNum != 0 {
+			note.Name = fmt.Sprintf("%s(%d)", note.Name, repeatedNum)
 		}
 
 		if parentDir.Valid {

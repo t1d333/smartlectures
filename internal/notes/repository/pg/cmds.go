@@ -32,7 +32,7 @@ const (
 	`
 
 	SelectUserNotesOverview = `
-		SELECT note_id, name, parent_dir
+		SELECT note_id, name, parent_dir, repeated_num
 		FROM notes
 		WHERE user_id = $1;
 	`

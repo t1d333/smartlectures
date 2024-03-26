@@ -93,6 +93,10 @@ func (r *Repository) GetDir(dirId int, ctx context.Context) (models.Dir, error) 
 		result.ParentDir = int(parentDir.Int32)
 	}
 
+	if result.RepeatedNum != 0 {
+		result.Name = fmt.Sprintf("%s(%d)", result.Name, result.RepeatedNum)
+	}
+
 	rows, _ := r.pool.Query(ctx, SelectSubdirs, dirId)
 	defer rows.Close()
 

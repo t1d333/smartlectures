@@ -47,10 +47,6 @@ func (s *Service) GetDir(dirId int, ctx context.Context) (models.Dir, error) {
 		err = fmt.Errorf("failed to get dir in dirs service: %w", err)
 	}
 
-	if dir.RepeatedNum != 0 {
-		dir.Name = fmt.Sprintf("%s(%d)", dir.Name, dir.RepeatedNum)
-	}
-
 	return dir, err
 }
 
