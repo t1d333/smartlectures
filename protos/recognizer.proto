@@ -1,16 +1,13 @@
 syntax = 'proto3';
 
+message ImageToRecognize { bytes data = 1; }
 
-message ImageToRecognize {
-  bytes data = 1;
-}
+message ImagesArrToRecognize { repeated bytes data = 1; }
 
-message RecognizedResult {
-  string result = 1;
-}
+message RecognizedResult { string result = 1; }
 
 service Recognizer {
-    rpc RecognizeFormula(ImageToRecognize) returns (RecognizedResult) {}
-    rpc RecognizeMixed(ImageToRecognize) returns (RecognizedResult) {}
-    rpc RecognizeText(ImageToRecognize) returns  (RecognizedResult) {}
+  rpc RecognizeFormula(ImageToRecognize) returns (RecognizedResult) {}
+  rpc RecognizeMixed(ImagesArrToRecognize) returns (RecognizedResult) {}
+  rpc RecognizeText(ImagesArrToRecognize) returns (RecognizedResult) {}
 }

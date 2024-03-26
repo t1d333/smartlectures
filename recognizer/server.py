@@ -13,15 +13,16 @@ class RecognizerServicer(recognizer_pb2_grpc.RecognizerServicer):
         pass
 
     def RecognizeFormula(self, request, context):
-        return recognizer_pb2.RecognizedResult(result=f'formula{request}')
+        logging.log(logging.WARN, type(request.data[0]))
+        return recognizer_pb2.RecognizedResult(result=f'formula{request.data[0]}')
 
     def RecognizeMixed(self, request, context):
-        logging.log(logging.INFO, request)
-        return recognizer_pb2.RecognizedResult(result=f'mixed{request}')
+        logging.log(logging.WARN, type(request.data[0]))
+        return recognizer_pb2.RecognizedResult(result=f'mixed{request.data[0]}')
 
     def RecognizeText(self, request, context):
-        logging.log(logging.INFO, request)
-        return recognizer_pb2.RecognizedResult(result=f'text{request}')
+        logging.log(logging.WARN, type(request.data[0]))
+        return recognizer_pb2.RecognizedResult(result=f'text{request.data[0]}')
 
 
 def serve():

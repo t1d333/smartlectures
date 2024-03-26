@@ -91,6 +91,7 @@ func (r *Repository) GetNotesOverview(
 	overview := make([]models.NotePreview, 0)
 
 	rows, _ := r.pool.Query(ctx, SelectUserNotesOverview, userId)
+	defer rows.Close()
 
 	parentDir := sql.NullInt32{}
 	for rows.Next() {

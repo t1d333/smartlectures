@@ -80,6 +80,8 @@ func (r *Repository) GetDir(dirId int, ctx context.Context) (models.Dir, error) 
 	}
 
 	rows, _ := r.pool.Query(ctx, SelectSubdirs, dirId)
+	defer rows.Close()
+
 	tmp := 0
 
 	for rows.Next() {
@@ -104,6 +106,8 @@ func (r *Repository) GetDirsOverview(userId int, ctx context.Context) (models.Di
 	result := models.DirsOverview{}
 
 	rows, _ := r.pool.Query(ctx, SelectUserDirsOverview, userId)
+	defer rows.Close()
+
 	tmp := 0
 
 	for rows.Next() {
