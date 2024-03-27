@@ -13,7 +13,7 @@ class RecognizerServicer(recognizer_pb2_grpc.RecognizerServicer):
         pass
 
     def RecognizeFormula(self, request, context):
-        logging.log(logging.WARN, type(request.data[0]))
+        logging.log(logging.WARN, type(request.data))
         return recognizer_pb2.RecognizedResult(result=f'formula')
 
     def RecognizeMixed(self, request, context):

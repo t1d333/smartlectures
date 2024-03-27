@@ -282,7 +282,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  formula:
+                  text:
                     type: string
         '500':
           description: Ответ при ошибке на стороне сервера
@@ -311,7 +311,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  formula:
+                  text:
                     type: string
         '500':
           description: Ответ при ошибке на стороне сервера
@@ -325,9 +325,11 @@ paths:
             schema:
               type: object
               properties:
-                image:
-                  type: string
-                  format: binary
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
       tags: [recognizer]
   /recognizer/mixed:
     post:
@@ -339,7 +341,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  formula:
+                  text:
                     type: string
         '500':
           description: Ответ при ошибке на стороне сервера
@@ -353,9 +355,11 @@ paths:
             schema:
               type: object
               properties:
-                image:
-                  type: string
-                  format: binary
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
       tags: [recognizer]
 components:
   schemas:

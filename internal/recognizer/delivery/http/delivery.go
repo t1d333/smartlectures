@@ -26,8 +26,8 @@ func NewDelivery(logger logger.Logger, mux *gin.Engine, service recognizer.Servi
 
 func (d *Delivery) RegisterHandler() {
 	d.mux.POST("/api/v1/recognizer/formula", d.RecognizeFormula)
-	d.mux.POST("/api/v1/notes/recognizer/text", d.RecognizeText)
-	d.mux.POST("/api/v1/notes/recognizer/mixed", d.RecognizeMixed)
+	d.mux.POST("/api/v1/recognizer/text", d.RecognizeText)
+	d.mux.POST("/api/v1/recognizer/mixed", d.RecognizeMixed)
 }
 
 func (d *Delivery) RecognizeFormula(c *gin.Context) {
@@ -50,11 +50,49 @@ func (d *Delivery) RecognizeFormula(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"formula": formula})
+	c.JSON(http.StatusOK, gin.H{"text": formula})
 }
 
 func (d *Delivery) RecognizeText(c *gin.Context) {
+	form, _ := c.MultipartForm()
+	files := form.File["images"]
+	if len(files) != 1 {
+		c.Error(errors.BadRequestError)
+		return
+	}
+
+	img, _ := files[0].Open()
+	defer img.Close()
+
+	data, _ := io.ReadAll(img)
+
+	text, err := d.service.RecognizeText([][]byte{data}, c.Request.Context())
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"text": text})
 }
 
 func (d *Delivery) RecognizeMixed(c *gin.Context) {
+	form, _ := c.MultipartForm()
+	files := form.File["images"]
+	if len(files) != 1 {
+		c.Error(errors.BadRequestError)
+		return
+	}
+
+	img, _ := files[0].Open()
+	defer img.Close()
+
+	data, _ := io.ReadAll(img)
+
+	text, err := d.service.RecognizeMixed([][]byte{data}, c.Request.Context())
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"text": text})
 }
