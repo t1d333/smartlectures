@@ -3,13 +3,13 @@ package pg
 const (
 	InsertNewNoteCMD = `
 		INSERT INTO notes(name, body, parent_dir, user_id, repeated_num)
-		VALUES($1, $2, $3, $4, (SELECT COUNT(*) FROM notes WHERE name = $5 AND parent_dir = $6))
+		VALUES($1, $2, $3, $4, (SELECT COUNT(*) FROM notes WHERE name = $5 AND parent_dir = $6 AND user_id = $7))
 		RETURNING note_id;
 	`
 
 	InsertNewNoteWithNullParentCMD = `
 		INSERT INTO notes(name, body, user_id, repeated_num)
-		VALUES($1, $2, $3, (SELECT COUNT(*) FROM notes WHERE name = $4 AND parent_dir IS NULL))
+		VALUES($1, $2, $3, (SELECT COUNT(*) FROM notes WHERE name = $4 AND user_id = $5 AND parent_dir IS NULL))
 		RETURNING note_id;
 	`
 

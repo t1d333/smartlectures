@@ -3,13 +3,13 @@ package pg
 const (
 	InsertNewDirCMD = `
 		INSERT INTO dirs(name, user_id, parent_dir, repeated_num)
-		VALUES($1, $2, $3, (SELECT COUNT(*) FROM dirs WHERE name = $4 AND parent_dir = $5))
+		VALUES($1, $2, $3, (SELECT COUNT(*) FROM dirs WHERE name = $4 AND parent_dir = $5 AND user_id = $6))
 		RETURNING dir_id;
 	`
 	
 	InsertNewDirWithNullParentCMD = `
 		INSERT INTO dirs(name, user_id, repeated_num)
-		VALUES($1, $2, (SELECT COUNT(*) FROM dirs WHERE name = $3 AND parent_dir IS NULL))
+		VALUES($1, $2, (SELECT COUNT(*) FROM dirs WHERE name = $3 AND user_id = $4 AND parent_dir IS NULL))
 		RETURNING dir_id;
 	`
 	

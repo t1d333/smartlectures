@@ -22,6 +22,9 @@ import (
 	dirsRep "github.com/t1d333/smartlectures/internal/dirs/repository/pg"
 	dirsServ "github.com/t1d333/smartlectures/internal/dirs/service"
 
+	recDel "github.com/t1d333/smartlectures/internal/recognizer/delivery/http"
+	recServ "github.com/t1d333/smartlectures/internal/recognizer/service"
+
 	"github.com/t1d333/smartlectures/pkg/logger"
 )
 
@@ -30,7 +33,6 @@ func main() {
 
 	router := gin.Default()
 
-	// TODO: cors settings
 	router.Use(cors.Default())
 
 	router.Use(middl.ErrorHandler)
@@ -39,8 +41,6 @@ func main() {
 		Addr:    ":8000",
 		Handler: router,
 	}
-
-	// db connection
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
@@ -78,6 +78,13 @@ func main() {
 	dirsDel := dirsDel.NewDelivery(logger, router, dirsServ)
 
 	dirsDel.RegisterHandler()
+
+	// recognizer
+
+	recognizerServ := recServ.NewService(logger, "recognizer:50051")
+	recognizerDel := recDel.NewDelivery(logger, router, recognizerServ)
+
+	recognizerDel.RegisterHandler()
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

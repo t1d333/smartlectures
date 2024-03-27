@@ -4,7 +4,9 @@ services:
   nginx:
     image: nginx
     container_name: nginx
-    volumes: ['${NGINX_CONFIG_PATH}:/etc/nginx/nginx.conf', './dist:/usr/share/nginx/html']
+    volumes:
+      - ${NGINX_CONFIG_PATH}:/etc/nginx/nginx.conf
+      - ./dist:/usr/share/nginx/html
     ports: ['${NGINX_HTTP_PORT}:80']
     depends_on: [backend, images]
     networks: [backend, swagger]
@@ -17,7 +19,7 @@ services:
     ports: [8000:8000]
     environment: ['DB_URL=${DB_URL}', 'PORT=${PORT}}']
     networks: [backend]
-    depends_on: [postgres, redis]
+    depends_on: [postgres, redis, recognizer]
     restart: always
   images:
     container_name: images

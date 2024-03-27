@@ -30,6 +30,7 @@ func (r *Repository) CreateNote(note models.Note, ctx context.Context) (int, err
 			note.Body,
 			note.UserId,
 			note.Name,
+			note.UserId,
 		)
 	} else {
 		row = r.pool.QueryRow(
@@ -41,6 +42,7 @@ func (r *Repository) CreateNote(note models.Note, ctx context.Context) (int, err
 			note.UserId,
 			note.Name,
 			note.ParentDir,
+			note.UserId,
 		)
 	}
 
@@ -95,7 +97,7 @@ func (r *Repository) GetNote(noteId int, ctx context.Context) (models.Note, erro
 	if note.RepeatedNum != 0 {
 		note.Name = fmt.Sprintf("%s(%d)", note.Name, note.RepeatedNum)
 	}
-	
+
 	if parentDir.Valid {
 		note.ParentDir = int(parentDir.Int32)
 	}

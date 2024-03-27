@@ -29,6 +29,7 @@ func (r *Repository) CreateDir(dir models.Dir, ctx context.Context) (int, error)
 			dir.Name,
 			dir.UserId,
 			dir.Name,
+			dir.UserId,
 		)
 	} else {
 		row = r.pool.QueryRow(
@@ -39,6 +40,7 @@ func (r *Repository) CreateDir(dir models.Dir, ctx context.Context) (int, error)
 			dir.ParentDir,
 			dir.Name,
 			dir.ParentDir,
+			dir.UserId,
 		)
 	}
 

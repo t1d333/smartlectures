@@ -271,6 +271,92 @@ paths:
                   type: string
                   format: binary
       tags: [images]
+        
+  /recognizer/formula:
+    post:
+      responses:
+        '200':
+          description: Ответ при успешном выполнении запроса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  formula:
+                    type: string
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      tags: [recognizer]
+        
+  /recognizer/text:
+    post:
+      responses:
+        '200':
+          description: Ответ при успешном выполнении запроса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  formula:
+                    type: string
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      tags: [recognizer]
+  /recognizer/mixed:
+    post:
+      responses:
+        '200':
+          description: Ответ при успешном выполнении запроса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  formula:
+                    type: string
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      tags: [recognizer]
 components:
   schemas:
     Dir:

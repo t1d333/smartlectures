@@ -1,4 +1,5 @@
 syntax = 'proto3';
+option go_package = "./service";
 
 message ImageToRecognize { bytes data = 1; }
 

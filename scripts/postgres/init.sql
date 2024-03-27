@@ -30,3 +30,35 @@ CREATE TABLE IF NOT EXISTS notes
     user_id     BIGINT REFERENCES users (user_id) NOT NULL
 
 );
+
+
+-- TRIGGERS
+
+CREATE OR REPLACE FUNCTION update_note_repeated_num()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.repeated_num = (SELECT COUNT(*) FROM notes WHERE name = NEW.name AND user_id = NEW.user_id AND parent_dir = NEW.parent_dir);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER update_note_repeated_num_trigger
+BEFORE UPDATE ON notes
+FOR EACH ROW
+EXECUTE FUNCTION update_note_repeated_num();
+
+CREATE OR REPLACE FUNCTION update_dir_repeated_num()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.repeated_num = (SELECT COUNT(*) FROM dirs WHERE name = NEW.name AND user_id = NEW.user_id AND parent_dir = NEW.parent_dir);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER update_dir_repeated_num_trigger
+BEFORE UPDATE ON dirs
+FOR EACH ROW
+EXECUTE FUNCTION update_dir_repeated_num();
+
