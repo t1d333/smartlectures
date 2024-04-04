@@ -1,5 +1,7 @@
 syntax = 'proto3';
-option go_package = "./service";
+option go_package = "github.com/t1d333/smartlectures/internal";
+
+package storage;
 
 message ImageToRecognize { bytes data = 1; }
 

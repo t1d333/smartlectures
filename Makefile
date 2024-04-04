@@ -1,4 +1,4 @@
-.PHONY: build down prod recognizer
+.PHONY: build down prod recognizer storage
 
 
 build:
@@ -21,10 +21,17 @@ swagger:
 lint:
 	@golangci-lint run ./...
 
+
+storage:
+	@protoc --go_out=./internal/ --go_opt=paths=source_relative \
+    --go-grpc_out=./internal/ --go-grpc_opt=paths=source_relative \
+    -Iprotos protos/storage/storage.proto
+	
 recognizer:
 	@python3 -m grpc_tools.protoc -Irecognizer=protos \
   	--python_out=. --pyi_out=. --grpc_python_out=. \
   	./protos/recognizer.proto
+	
 recognizer-client:
 	@protoc --go_out=./internal/recognizer/service --go_opt=paths=source_relative \
     --go-grpc_out=./internal/recognizer/service --go-grpc_opt=paths=source_relative \
