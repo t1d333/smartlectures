@@ -11,12 +11,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/gin-contrib/cors"
 	middl "github.com/t1d333/smartlectures/internal/middleware"
 	notesDel "github.com/t1d333/smartlectures/internal/notes/delivery/http"
 	notesRep "github.com/t1d333/smartlectures/internal/notes/repository/pg"
 	notesServ "github.com/t1d333/smartlectures/internal/notes/service"
+	storage "github.com/t1d333/smartlectures/internal/storage"
 
 	dirsDel "github.com/t1d333/smartlectures/internal/dirs/delivery/http"
 	dirsRep "github.com/t1d333/smartlectures/internal/dirs/repository/pg"
@@ -66,8 +69,22 @@ func main() {
 	logger.Infow("db connection successfully")
 
 	// notes
+
+	logger.Info("creating storage client...")
+	conn, err := grpc.Dial(
+		"storage:50051",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		logger.Fatalf("failed to create storage client %s", err)
+	}
+	defer conn.Close()
+	logger.Info("storage client cratead successfully")
+
+	storageClient := storage.NewStorageClient(conn)
+
 	notesRep := notesRep.NewRepository(logger, pool)
-	notesServ := notesServ.NewService(logger, notesRep)
+	notesServ := notesServ.NewService(logger, notesRep, storageClient)
 	notesDel := notesDel.NewDelivery(logger, router, notesServ)
 
 	notesDel.RegisterHandler()

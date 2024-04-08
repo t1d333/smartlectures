@@ -3,12 +3,13 @@ package elasticsearch
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
 	elastic "github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
+	jsoniter "github.com/json-iterator/go"
+	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/internal/storage/repository"
 	"github.com/t1d333/smartlectures/pkg/logger"
 )
@@ -24,29 +25,114 @@ func NewRepository(logger logger.Logger) (repository.Repository, error) {
 		return nil, fmt.Errorf("failed to create elastic client: %w", err)
 	}
 
-	data, err := json.Marshal(struct {
-		Title string `json:"title"`
-	}{Title: "test1234"})
-
-	req := esapi.IndexRequest{
-		Index:      "test",
-		DocumentID: strconv.Itoa(10),
-		Body:       bytes.NewReader(data),
-		Refresh:    "true",
-	}
-
-	res, err := req.Do(context.Background(), client)
-	
+	_, err = client.Ping()
 	if err != nil {
-		logger.Error("Error getting response: %s", err)
+		return nil, fmt.Errorf("failed to connect to elasticsearch: %w", err)
 	}
-	
-	logger.Info(res)
-	defer res.Body.Close()
-	
 
-	return Repository{
+	return &Repository{
 		client: client,
 		logger: logger,
 	}, nil
+}
+
+func (r *Repository) GetNote(ctx context.Context, id int) (models.Note, error) {
+	req := esapi.GetRequest{
+		Index:      "notes",
+		DocumentID: strconv.Itoa(id),
+		Source:     []string{"name", "body"},
+		FilterPath: []string{"_source"},
+	}
+
+	res, err := req.Do(ctx, r.client)
+	if err != nil {
+		return models.Note{}, fmt.Errorf("failed to get note in repository: %w", err)
+	}
+
+	defer res.Body.Close()
+
+	var data struct {
+		Source models.Note `json:"_source"`
+	}
+
+	var body bytes.Buffer
+	body.ReadFrom(res.Body)
+
+	if err != nil {
+		return models.Note{}, fmt.Errorf("failed to read note: %w", err)
+	}
+
+	if jsoniter.Unmarshal(body.Bytes(), &data); err != nil {
+		return models.Note{}, fmt.Errorf("failed to unmarshal note: %w", err)
+	}
+
+	return data.Source, nil
+}
+
+func (r *Repository) CreateNote(ctx context.Context, note models.Note) error {
+	raw, err := jsoniter.Marshal(note)
+	if err != nil {
+		return fmt.Errorf("failed to marshal note struct: %w", err)
+	}
+
+	req := esapi.IndexRequest{
+		Index:      "notes",
+		Body:       bytes.NewReader(raw),
+		DocumentID: strconv.Itoa(note.NoteId),
+		Refresh:    "true",
+	}
+
+	if _, err = req.Do(ctx, r.client); err != nil {
+		return fmt.Errorf("failed to store note in repository: %w", err)
+	}
+
+	return nil
+}
+
+func (r *Repository) UpdateNote(ctx context.Context, note models.Note) error {
+	r.logger.Info(note)
+	body, err := jsoniter.Marshal(note)
+	if err != nil {
+		return fmt.Errorf("failed to marshal note: %w", err)
+	}
+
+	req := esapi.UpdateRequest{
+		Index:      "notes",
+		DocumentID: strconv.Itoa(note.NoteId),
+		Body:        bytes.NewReader([]byte(fmt.Sprintf(`{"doc":%s}`, body))), 
+	}
+
+	res, err := req.Do(ctx, r.client)
+	if err != nil {
+		return fmt.Errorf("failed to make update note request: %w", err)
+	}
+
+	if res.IsError() {
+		return fmt.Errorf("failed update note: " + res.Status())
+	}
+
+	return nil
+}
+
+func (r *Repository) DeleteNote(ctx context.Context, id int) error {
+	r.logger.Info(id)
+	req := esapi.DeleteRequest{
+		Index:      "notes",
+		DocumentID: strconv.Itoa(id),
+	}
+
+	res, err := req.Do(ctx, r.client)
+	if err != nil {
+		return fmt.Errorf("failed to make delete request: %w", err)
+	}
+
+	if res.IsError() {
+		return fmt.Errorf("failed to update note data in repository: %w", err)
+	}
+
+	return nil
+}
+
+func (r *Repository) Search(ctx context.Context, query string) error {
+	panic("unimplemented")
 }

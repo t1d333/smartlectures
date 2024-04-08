@@ -20,10 +20,12 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// NotesClient is the client API for Notes service.
+// StorageClient is the client API for Storage service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type NotesClient interface {
+type StorageClient interface {
+	GetNote(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*Note, error)
+	GetDir(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*Dir, error)
 	CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*status.Status, error)
 	UpdateNote(ctx context.Context, in *NoteUpdateRequest, opts ...grpc.CallOption) (*status.Status, error)
 	CreateDir(ctx context.Context, in *Dir, opts ...grpc.CallOption) (*status.Status, error)
@@ -32,254 +34,324 @@ type NotesClient interface {
 	Search(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error)
 }
 
-type notesClient struct {
+type storageClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewNotesClient(cc grpc.ClientConnInterface) NotesClient {
-	return &notesClient{cc}
+func NewStorageClient(cc grpc.ClientConnInterface) StorageClient {
+	return &storageClient{cc}
 }
 
-func (c *notesClient) CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*status.Status, error) {
-	out := new(status.Status)
-	err := c.cc.Invoke(ctx, "/Notes/CreateNote", in, out, opts...)
+func (c *storageClient) GetNote(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*Note, error) {
+	out := new(Note)
+	err := c.cc.Invoke(ctx, "/Storage/GetNote", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *notesClient) UpdateNote(ctx context.Context, in *NoteUpdateRequest, opts ...grpc.CallOption) (*status.Status, error) {
-	out := new(status.Status)
-	err := c.cc.Invoke(ctx, "/Notes/UpdateNote", in, out, opts...)
+func (c *storageClient) GetDir(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*Dir, error) {
+	out := new(Dir)
+	err := c.cc.Invoke(ctx, "/Storage/GetDir", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *notesClient) CreateDir(ctx context.Context, in *Dir, opts ...grpc.CallOption) (*status.Status, error) {
+func (c *storageClient) CreateNote(ctx context.Context, in *Note, opts ...grpc.CallOption) (*status.Status, error) {
 	out := new(status.Status)
-	err := c.cc.Invoke(ctx, "/Notes/CreateDir", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Storage/CreateNote", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *notesClient) DeleteDir(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*status.Status, error) {
+func (c *storageClient) UpdateNote(ctx context.Context, in *NoteUpdateRequest, opts ...grpc.CallOption) (*status.Status, error) {
 	out := new(status.Status)
-	err := c.cc.Invoke(ctx, "/Notes/DeleteDir", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Storage/UpdateNote", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *notesClient) DeleteNote(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*status.Status, error) {
+func (c *storageClient) CreateDir(ctx context.Context, in *Dir, opts ...grpc.CallOption) (*status.Status, error) {
 	out := new(status.Status)
-	err := c.cc.Invoke(ctx, "/Notes/DeleteNote", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Storage/CreateDir", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *notesClient) Search(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error) {
+func (c *storageClient) DeleteDir(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*status.Status, error) {
+	out := new(status.Status)
+	err := c.cc.Invoke(ctx, "/Storage/DeleteDir", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageClient) DeleteNote(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*status.Status, error) {
+	out := new(status.Status)
+	err := c.cc.Invoke(ctx, "/Storage/DeleteNote", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storageClient) Search(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error) {
 	out := new(SearchResponse)
-	err := c.cc.Invoke(ctx, "/Notes/Search", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Storage/Search", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// NotesServer is the server API for Notes service.
-// All implementations must embed UnimplementedNotesServer
+// StorageServer is the server API for Storage service.
+// All implementations must embed UnimplementedStorageServer
 // for forward compatibility
-type NotesServer interface {
+type StorageServer interface {
+	GetNote(context.Context, *wrapperspb.Int32Value) (*Note, error)
+	GetDir(context.Context, *wrapperspb.Int32Value) (*Dir, error)
 	CreateNote(context.Context, *Note) (*status.Status, error)
 	UpdateNote(context.Context, *NoteUpdateRequest) (*status.Status, error)
 	CreateDir(context.Context, *Dir) (*status.Status, error)
 	DeleteDir(context.Context, *wrapperspb.Int32Value) (*status.Status, error)
 	DeleteNote(context.Context, *wrapperspb.Int32Value) (*status.Status, error)
 	Search(context.Context, *wrapperspb.StringValue) (*SearchResponse, error)
-	mustEmbedUnimplementedNotesServer()
+	mustEmbedUnimplementedStorageServer()
 }
 
-// UnimplementedNotesServer must be embedded to have forward compatible implementations.
-type UnimplementedNotesServer struct {
+// UnimplementedStorageServer must be embedded to have forward compatible implementations.
+type UnimplementedStorageServer struct {
 }
 
-func (UnimplementedNotesServer) CreateNote(context.Context, *Note) (*status.Status, error) {
+func (UnimplementedStorageServer) GetNote(context.Context, *wrapperspb.Int32Value) (*Note, error) {
+	return nil, status1.Errorf(codes.Unimplemented, "method GetNote not implemented")
+}
+func (UnimplementedStorageServer) GetDir(context.Context, *wrapperspb.Int32Value) (*Dir, error) {
+	return nil, status1.Errorf(codes.Unimplemented, "method GetDir not implemented")
+}
+func (UnimplementedStorageServer) CreateNote(context.Context, *Note) (*status.Status, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method CreateNote not implemented")
 }
-func (UnimplementedNotesServer) UpdateNote(context.Context, *NoteUpdateRequest) (*status.Status, error) {
+func (UnimplementedStorageServer) UpdateNote(context.Context, *NoteUpdateRequest) (*status.Status, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method UpdateNote not implemented")
 }
-func (UnimplementedNotesServer) CreateDir(context.Context, *Dir) (*status.Status, error) {
+func (UnimplementedStorageServer) CreateDir(context.Context, *Dir) (*status.Status, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method CreateDir not implemented")
 }
-func (UnimplementedNotesServer) DeleteDir(context.Context, *wrapperspb.Int32Value) (*status.Status, error) {
+func (UnimplementedStorageServer) DeleteDir(context.Context, *wrapperspb.Int32Value) (*status.Status, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method DeleteDir not implemented")
 }
-func (UnimplementedNotesServer) DeleteNote(context.Context, *wrapperspb.Int32Value) (*status.Status, error) {
+func (UnimplementedStorageServer) DeleteNote(context.Context, *wrapperspb.Int32Value) (*status.Status, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method DeleteNote not implemented")
 }
-func (UnimplementedNotesServer) Search(context.Context, *wrapperspb.StringValue) (*SearchResponse, error) {
+func (UnimplementedStorageServer) Search(context.Context, *wrapperspb.StringValue) (*SearchResponse, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method Search not implemented")
 }
-func (UnimplementedNotesServer) mustEmbedUnimplementedNotesServer() {}
+func (UnimplementedStorageServer) mustEmbedUnimplementedStorageServer() {}
 
-// UnsafeNotesServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to NotesServer will
+// UnsafeStorageServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to StorageServer will
 // result in compilation errors.
-type UnsafeNotesServer interface {
-	mustEmbedUnimplementedNotesServer()
+type UnsafeStorageServer interface {
+	mustEmbedUnimplementedStorageServer()
 }
 
-func RegisterNotesServer(s grpc.ServiceRegistrar, srv NotesServer) {
-	s.RegisterService(&Notes_ServiceDesc, srv)
+func RegisterStorageServer(s grpc.ServiceRegistrar, srv StorageServer) {
+	s.RegisterService(&Storage_ServiceDesc, srv)
 }
 
-func _Notes_CreateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Storage_GetNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(wrapperspb.Int32Value)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).GetNote(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Storage/GetNote",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).GetNote(ctx, req.(*wrapperspb.Int32Value))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Storage_GetDir_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(wrapperspb.Int32Value)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).GetDir(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Storage/GetDir",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).GetDir(ctx, req.(*wrapperspb.Int32Value))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Storage_CreateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Note)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotesServer).CreateNote(ctx, in)
+		return srv.(StorageServer).CreateNote(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Notes/CreateNote",
+		FullMethod: "/Storage/CreateNote",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotesServer).CreateNote(ctx, req.(*Note))
+		return srv.(StorageServer).CreateNote(ctx, req.(*Note))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Notes_UpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Storage_UpdateNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(NoteUpdateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotesServer).UpdateNote(ctx, in)
+		return srv.(StorageServer).UpdateNote(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Notes/UpdateNote",
+		FullMethod: "/Storage/UpdateNote",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotesServer).UpdateNote(ctx, req.(*NoteUpdateRequest))
+		return srv.(StorageServer).UpdateNote(ctx, req.(*NoteUpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Notes_CreateDir_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Storage_CreateDir_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Dir)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotesServer).CreateDir(ctx, in)
+		return srv.(StorageServer).CreateDir(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Notes/CreateDir",
+		FullMethod: "/Storage/CreateDir",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotesServer).CreateDir(ctx, req.(*Dir))
+		return srv.(StorageServer).CreateDir(ctx, req.(*Dir))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Notes_DeleteDir_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Storage_DeleteDir_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(wrapperspb.Int32Value)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotesServer).DeleteDir(ctx, in)
+		return srv.(StorageServer).DeleteDir(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Notes/DeleteDir",
+		FullMethod: "/Storage/DeleteDir",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotesServer).DeleteDir(ctx, req.(*wrapperspb.Int32Value))
+		return srv.(StorageServer).DeleteDir(ctx, req.(*wrapperspb.Int32Value))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Notes_DeleteNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Storage_DeleteNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(wrapperspb.Int32Value)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotesServer).DeleteNote(ctx, in)
+		return srv.(StorageServer).DeleteNote(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Notes/DeleteNote",
+		FullMethod: "/Storage/DeleteNote",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotesServer).DeleteNote(ctx, req.(*wrapperspb.Int32Value))
+		return srv.(StorageServer).DeleteNote(ctx, req.(*wrapperspb.Int32Value))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Notes_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Storage_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(wrapperspb.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotesServer).Search(ctx, in)
+		return srv.(StorageServer).Search(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Notes/Search",
+		FullMethod: "/Storage/Search",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotesServer).Search(ctx, req.(*wrapperspb.StringValue))
+		return srv.(StorageServer).Search(ctx, req.(*wrapperspb.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Notes_ServiceDesc is the grpc.ServiceDesc for Notes service.
+// Storage_ServiceDesc is the grpc.ServiceDesc for Storage service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Notes_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Notes",
-	HandlerType: (*NotesServer)(nil),
+var Storage_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "Storage",
+	HandlerType: (*StorageServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetNote",
+			Handler:    _Storage_GetNote_Handler,
+		},
+		{
+			MethodName: "GetDir",
+			Handler:    _Storage_GetDir_Handler,
+		},
+		{
 			MethodName: "CreateNote",
-			Handler:    _Notes_CreateNote_Handler,
+			Handler:    _Storage_CreateNote_Handler,
 		},
 		{
 			MethodName: "UpdateNote",
-			Handler:    _Notes_UpdateNote_Handler,
+			Handler:    _Storage_UpdateNote_Handler,
 		},
 		{
 			MethodName: "CreateDir",
-			Handler:    _Notes_CreateDir_Handler,
+			Handler:    _Storage_CreateDir_Handler,
 		},
 		{
 			MethodName: "DeleteDir",
-			Handler:    _Notes_DeleteDir_Handler,
+			Handler:    _Storage_DeleteDir_Handler,
 		},
 		{
 			MethodName: "DeleteNote",
-			Handler:    _Notes_DeleteNote_Handler,
+			Handler:    _Storage_DeleteNote_Handler,
 		},
 		{
 			MethodName: "Search",
-			Handler:    _Notes_Search_Handler,
+			Handler:    _Storage_Search_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

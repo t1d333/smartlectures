@@ -1,1 +1,63 @@
 package service
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/t1d333/smartlectures/internal/models"
+	storage "github.com/t1d333/smartlectures/internal/storage"
+	"github.com/t1d333/smartlectures/internal/storage/repository"
+	"github.com/t1d333/smartlectures/pkg/logger"
+)
+
+type Service struct {
+	logger     logger.Logger
+	repository repository.Repository
+}
+
+func (s *Service) GetNote(ctx context.Context, id int) (models.Note, error) {
+	note, err := s.repository.GetNote(ctx, id)
+	if err != nil {
+		return note, fmt.Errorf("failed to get note in service: %w", err)
+	}
+
+	return note, nil
+}
+
+func (s *Service) CreateNote(ctx context.Context, note models.Note) error {
+	err := s.repository.CreateNote(ctx, note)
+	if err != nil {
+		return fmt.Errorf("failed to create note in service: %w", err)
+	}
+
+	return err
+}
+
+func (s *Service) DeleteNote(ctx context.Context, id int) error {
+	err := s.repository.DeleteNote(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete note data in service: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Service) Search(ctx context.Context, query string) error {
+	panic("unimplemented")
+}
+
+func (s *Service) UpdateNote(ctx context.Context, note models.Note) error {
+	err := s.repository.UpdateNote(ctx, note)
+	if err != nil {
+		return fmt.Errorf("failed to update note data in service: %w", err)
+	}
+
+	return nil
+}
+
+func NewService(logger logger.Logger, rep repository.Repository) storage.Service {
+	return &Service{
+		logger:     logger,
+		repository: rep,
+	}
+}

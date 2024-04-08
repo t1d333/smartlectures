@@ -23,7 +23,9 @@ message NoteUpdateRequest {
 
 message SearchResponse { repeated Note notes = 1; }
 
-service Notes {
+service Storage {
+  rpc GetNote(google.protobuf.Int32Value) returns (Note) {}
+  rpc GetDir(google.protobuf.Int32Value) returns (Dir) {}
   rpc CreateNote(Note) returns (google.rpc.Status) {}
   rpc UpdateNote(NoteUpdateRequest) returns (google.rpc.Status) {}
   rpc CreateDir(Dir) returns (google.rpc.Status) {}

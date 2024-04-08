@@ -37,10 +37,11 @@ services:
     build:
       context: .
       dockerfile: ./cmd/storage/Dockerfile
-    ports: [8002:8000]
+    ports: [8003:8000]
     networks: [backend]
     depends_on: [elasticsearch]
-    environment: ['ELASTICSEARCH_URL=http://elasticsearch:9200']
+    environment: [ELASTICSEARCH_URL=http://elasticsearch:9200]
+    restart: always
   recognizer:
     container_name: recognizer
     build:
@@ -80,7 +81,7 @@ services:
     image: elasticsearch:8.13.0
     ports: [9200:9200, 9300:9300]
     networks: [backend]
-    environment: [discovery.type=single-node]
+    environment: [discovery.type=single-node, xpack.security.enabled=false]
 networks:
   backend:
     driver: bridge
