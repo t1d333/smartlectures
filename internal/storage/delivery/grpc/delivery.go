@@ -41,6 +41,30 @@ func (d *Delivery) GetNote(ctx context.Context, id *wrapperspb.Int32Value) (*sto
 	}, nil
 }
 
+// SearchDir implements service.StorageServer.
+func (*Delivery) SearchDir(
+	context.Context,
+	*wrapperspb.StringValue,
+) (*storage.SearchResponse, error) {
+	panic("unimplemented")
+}
+
+// SearchNoteByBody implements service.StorageServer.
+func (*Delivery) SearchNoteByBody(
+	context.Context,
+	*wrapperspb.StringValue,
+) (*storage.SearchResponse, error) {
+	panic("unimplemented")
+}
+
+// SearchNoteByName implements service.StorageServer.
+func (*Delivery) SearchNoteByName(
+	context.Context,
+	*wrapperspb.StringValue,
+) (*storage.SearchResponse, error) {
+	panic("unimplemented")
+}
+
 func (*Delivery) CreateDir(context.Context, *storage.Dir) (*status.Status, error) {
 	panic("unimplemented")
 }

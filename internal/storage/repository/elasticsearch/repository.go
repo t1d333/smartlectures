@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	elastic "github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
@@ -17,6 +18,54 @@ import (
 type Repository struct {
 	client *elastic.Client
 	logger logger.Logger
+}
+
+func (*Repository) SearchDir(ctx context.Context, query string) ([]int, error) {
+	panic("unimplemented")
+}
+
+// SearchNoteByBody implements repository.Repository.
+func (*Repository) SearchNoteByBody(ctx context.Context, query string) ([]int, error) {
+	panic("unimplemented")
+}
+
+// SearchNoteByName implements repository.Repository.
+func (r *Repository) SearchNoteByName(ctx context.Context, query string) ([]int, error) {
+	body := map[string]interface{}{
+		"query": map[string]interface{}{
+			"match": map[string]interface{}{
+				"name": query,
+			},
+		},
+	}
+
+	var rawBody bytes.Buffer
+
+	if err := jsoniter.NewEncoder(&rawBody).Encode(body); err != nil {
+		return []int{}, fmt.Errorf("failed to create search query: %w", err)
+	}
+
+	req := esapi.SearchRequest{
+		Index: []string{"your_index"},
+		Body:  strings.NewReader(rawBody.String()),
+	}
+
+	// Выполнение запроса
+	res, err := req.Do(context.Background(), r.client)
+	if err != nil {
+		return []int{}, fmt.Errorf("failed to make search request: %w", err)
+	}
+
+	defer res.Body.Close()
+
+	var tmp map[string]interface{}
+
+	if err := jsoniter.NewDecoder(res.Body).Decode(&tmp); err != nil {
+	}
+
+	fmt.Println(r)
+
+	return []int{}, nil
 }
 
 func NewRepository(logger logger.Logger) (repository.Repository, error) {
@@ -75,7 +124,7 @@ func (r *Repository) CreateNote(ctx context.Context, note models.Note) error {
 		return fmt.Errorf("failed to marshal note struct: %w", err)
 	}
 
-	req := esapi.IndexRequest{
+	req := esapi.CreateRequest{
 		Index:      "notes",
 		Body:       bytes.NewReader(raw),
 		DocumentID: strconv.Itoa(note.NoteId),
@@ -99,7 +148,7 @@ func (r *Repository) UpdateNote(ctx context.Context, note models.Note) error {
 	req := esapi.UpdateRequest{
 		Index:      "notes",
 		DocumentID: strconv.Itoa(note.NoteId),
-		Body:        bytes.NewReader([]byte(fmt.Sprintf(`{"doc":%s}`, body))), 
+		Body:       bytes.NewReader([]byte(fmt.Sprintf(`{"doc":%s}`, body))),
 	}
 
 	res, err := req.Do(ctx, r.client)

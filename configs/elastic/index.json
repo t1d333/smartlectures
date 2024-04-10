@@ -1,0 +1,43 @@
+{
+    "settings": {
+        "index": {
+            "analysis": {
+                "analyzer": {
+                    "notes_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "lowercase",
+                            "russian_morphology",
+                            "english_morphology",
+                            "ru_stop",
+                            "ru_stemmer"
+                        ]
+                    }
+                },
+                "filter": {
+                  "ru_stop": {
+                      "type":       "stop",
+                      "stopwords":  "_russian_"
+                  },
+                  "ru_stemmer": {
+                    "type":       "stemmer",
+                    "language":   "russian"
+                  }
+                }
+            }
+        }
+    },
+    "mappings": {
+        "properties": {
+            "name": {
+                "type": "text",
+                "analyzer": "notes_analyzer"
+            },
+            "body": {
+                "type": "text",
+                "analyzer": "notes_analyzer"
+            }
+        }
+    }
+}

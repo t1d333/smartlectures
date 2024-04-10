@@ -28,6 +28,9 @@ storage:
     -Iprotos protos/storage/storage.proto
 	
 recognizer:
+	@cp ./configs/recognizer/Dockerfile ./recognizer/Dockerfile
+	
+recognizer-server:
 	@python3 -m grpc_tools.protoc -Irecognizer=protos \
   	--python_out=. --pyi_out=. --grpc_python_out=. \
   	./protos/recognizer.proto

@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS dirs
     name       VARCHAR(128) NOT NULL,
     user_id    BIGINT REFERENCES users (user_id) NOT NULL,
     repeated_num BIGINT DEFAULT 0,
-    parent_dir BIGINT REFERENCES dirs (dir_id) DEFAULT NULL
+    parent_dir BIGINT REFERENCES dirs (dir_id) DEFAULT NULL,
+    icon_url VARCHAR(512) NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS notes
@@ -28,7 +29,6 @@ CREATE TABLE IF NOT EXISTS notes
     parent_dir  BIGINT REFERENCES dirs (dir_id) DEFAULT NULL,
     repeated_num BIGINT NOT NULL DEFAULT 0,
     user_id     BIGINT REFERENCES users (user_id) NOT NULL
-
 );
 
 

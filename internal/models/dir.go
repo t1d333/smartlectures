@@ -6,5 +6,6 @@ type Dir struct {
 	UserId      int    `json:"userId"`
 	RepeatedNum int    `json:"-"`
 	ParentDir   int    `json:"parentDir"`
+	IconURL     string `json:"iconURL"`
 	Subdirs     []Dir  `json:"subdirs"`
 }

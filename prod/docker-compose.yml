@@ -20,8 +20,24 @@ services:
       dockerfile: Dockerfile
     environment: ['DB_URL=${DB_URL}', 'PORT=${PORT}}']
     networks: [backend]
-    depends_on: [postgres, redis]
+    depends_on: [postgres, redis, recognizer, storage]
     restart: always
+  storage:
+    container_name: storage
+    build:
+      context: .
+      dockerfile: ./cmd/storage/Dockerfile
+    networks: [backend]
+    depends_on: [elasticsearch]
+    environment: [ELASTICSEARCH_URL=http://elasticsearch:9200]
+    restart: always
+  elasticsearch:
+    container_name: elastic
+    build:
+      context: ./configs/elastic
+      dockerfile: Dockerfile
+    networks: [backend]
+    environment: [discovery.type=single-node, xpack.security.enabled=false]
   images:
     container_name: images
     build:
@@ -39,6 +55,7 @@ services:
       dockerfile: Dockerfile
     ports: [8002:50051]
     networks: [backend]
+    environment: [CNSTD_DOWNLOAD_SOURCE="HF", CNOCR_DOWNLOAD_SOURCE="HF"]
   swagger:
     container_name: swagger
     image: swaggerapi/swagger-ui

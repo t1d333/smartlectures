@@ -11,5 +11,7 @@ type Repository interface {
 	CreateNote(ctx context.Context, note models.Note) error
 	UpdateNote(ctx context.Context, note models.Note) error
 	DeleteNote(ctx context.Context, id int) error
-	Search(ctx context.Context, query string) error
+	SearchNoteByName(ctx context.Context, query string) ([]int, error)
+	SearchNoteByBody(ctx context.Context, query string) ([]int, error)
+	SearchDir(ctx context.Context, query string) ([]int, error)
 }

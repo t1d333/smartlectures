@@ -389,6 +389,11 @@ components:
           description: Числовой идентификатор родительской папки
           example: 1337
           x-isnullable: flase 
+        iconUrl:
+          type: string
+          description: Ссылка на URL иконки
+          example: ""
+          x-isnullable: false
         subdirs:
           x-isnullable: true
           type: array

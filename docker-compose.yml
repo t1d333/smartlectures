@@ -19,7 +19,7 @@ services:
     ports: [8000:8000]
     environment: ['DB_URL=${DB_URL}', 'PORT=${PORT}}']
     networks: [backend]
-    depends_on: [postgres, redis, recognizer]
+    depends_on: [postgres, redis, recognizer, storage]
     restart: always
   images:
     container_name: images
@@ -49,6 +49,7 @@ services:
       dockerfile: Dockerfile
     ports: [8002:50051]
     networks: [backend]
+    environment: [CNSTD_DOWNLOAD_SOURCE="HF", CNOCR_DOWNLOAD_SOURCE="HF"]
   swagger:
     container_name: swagger
     image: swaggerapi/swagger-ui
@@ -78,7 +79,9 @@ services:
     networks: [backend]
   elasticsearch:
     container_name: elastic
-    image: elasticsearch:8.13.0
+    build:
+      context: ./configs/elastic
+      dockerfile: Dockerfile
     ports: [9200:9200, 9300:9300]
     networks: [backend]
     environment: [discovery.type=single-node, xpack.security.enabled=false]
