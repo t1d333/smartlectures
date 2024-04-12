@@ -24,48 +24,68 @@ func (*Repository) SearchDir(ctx context.Context, query string) ([]int, error) {
 	panic("unimplemented")
 }
 
-// SearchNoteByBody implements repository.Repository.
-func (*Repository) SearchNoteByBody(ctx context.Context, query string) ([]int, error) {
-	panic("unimplemented")
-}
+func (r *Repository) SearchNote(
+	ctx context.Context,
+	query string,
+) ([]models.NoteSearchItem, error) {
+	var buf bytes.Buffer
 
-// SearchNoteByName implements repository.Repository.
-func (r *Repository) SearchNoteByName(ctx context.Context, query string) ([]int, error) {
 	body := map[string]interface{}{
 		"query": map[string]interface{}{
-			"match": map[string]interface{}{
-				"name": query,
+			"multi_match": map[string]interface{}{
+				"query":     query,
+				"fields":    []string{"name", "body"},
+				"fuzziness": "AUTO",
+			},
+		},
+		"highlight": map[string]interface{}{
+			"fields": map[string]interface{}{
+				"name": map[string]interface{}{
+					"fragment_size": 50,
+				},
+				"body": map[string]interface{}{
+					"fragment_size": 100,
+				},
 			},
 		},
 	}
 
-	var rawBody bytes.Buffer
-
-	if err := jsoniter.NewEncoder(&rawBody).Encode(body); err != nil {
-		return []int{}, fmt.Errorf("failed to create search query: %w", err)
+	if err := jsoniter.NewEncoder(&buf).Encode(&body); err != nil {
+		return []models.NoteSearchItem{}, fmt.Errorf("failed to create search request: %w", err)
 	}
 
-	req := esapi.SearchRequest{
-		Index: []string{"your_index"},
-		Body:  strings.NewReader(rawBody.String()),
-	}
-
-	// Выполнение запроса
-	res, err := req.Do(context.Background(), r.client)
+	res, err := r.client.Search(
+		r.client.Search.WithBody(strings.NewReader(buf.String())),
+		r.client.Search.WithSource("noteId", "name"),
+	)
 	if err != nil {
-		return []int{}, fmt.Errorf("failed to make search request: %w", err)
+		return []models.NoteSearchItem{}, fmt.Errorf("failed to make search request: %w", err)
 	}
 
 	defer res.Body.Close()
 
-	var tmp map[string]interface{}
-
-	if err := jsoniter.NewDecoder(res.Body).Decode(&tmp); err != nil {
+	if res.IsError() {
+		return []models.NoteSearchItem{}, fmt.Errorf("failed to search note")
 	}
 
-	fmt.Println(r)
+	var response NoteSearchResponse
 
-	return []int{}, nil
+	if err := jsoniter.NewDecoder(res.Body).Decode(&response); err != nil {
+		return []models.NoteSearchItem{}, fmt.Errorf("failed to decode search result: %w", err)
+	}
+
+	result := []models.NoteSearchItem{}
+
+	for _, hit := range response.Hits.Hits {
+		result = append(result, models.NoteSearchItem{
+			NoteID:        hit.Source.Id,
+			Name:          hit.Source.Name,
+			BodyHighlight: hit.Highlight.Body,
+			NameHighlight: hit.Highlight.Name,
+		})
+	}
+
+	return result, nil
 }
 
 func NewRepository(logger logger.Logger) (repository.Repository, error) {
@@ -180,8 +200,4 @@ func (r *Repository) DeleteNote(ctx context.Context, id int) error {
 	}
 
 	return nil
-}
-
-func (r *Repository) Search(ctx context.Context, query string) error {
-	panic("unimplemented")
 }

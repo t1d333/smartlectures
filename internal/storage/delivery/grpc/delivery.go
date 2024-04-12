@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/t1d333/smartlectures/internal/errors"
 	"github.com/t1d333/smartlectures/internal/models"
@@ -49,22 +50,6 @@ func (*Delivery) SearchDir(
 	panic("unimplemented")
 }
 
-// SearchNoteByBody implements service.StorageServer.
-func (*Delivery) SearchNoteByBody(
-	context.Context,
-	*wrapperspb.StringValue,
-) (*storage.SearchResponse, error) {
-	panic("unimplemented")
-}
-
-// SearchNoteByName implements service.StorageServer.
-func (*Delivery) SearchNoteByName(
-	context.Context,
-	*wrapperspb.StringValue,
-) (*storage.SearchResponse, error) {
-	panic("unimplemented")
-}
-
 func (*Delivery) CreateDir(context.Context, *storage.Dir) (*status.Status, error) {
 	panic("unimplemented")
 }
@@ -105,8 +90,29 @@ func (d *Delivery) DeleteNote(
 	}, nil
 }
 
-func (*Delivery) Search(context.Context, *wrapperspb.StringValue) (*storage.SearchResponse, error) {
-	panic("unimplemented")
+func (d *Delivery) SearchNote(
+	ctx context.Context,
+	query *wrapperspb.StringValue,
+) (*storage.SearchResponse, error) {
+	searchItems, err := d.service.SearchNote(ctx, query.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to search note: %w", err)
+	}
+
+	result := &storage.SearchResponse{
+		Items: []*storage.NoteSearchItem{},
+	}
+
+	for _, item := range searchItems {
+		result.Items = append(result.Items, &storage.NoteSearchItem{
+			Id:            int32(item.NoteID),
+			Name:          item.Name,
+			NameHighlight: item.NameHighlight,
+			BodyHighlight: item.BodyHighlight,
+		})
+	}
+
+	return result, nil
 }
 
 func (d *Delivery) UpdateNote(

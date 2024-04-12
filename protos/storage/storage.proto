@@ -21,7 +21,14 @@ message NoteUpdateRequest {
   int32 id = 3;
 }
 
-message SearchResponse { repeated Note notes = 1; }
+message NoteSearchItem {
+  int32 id = 1;
+  string name = 2;
+  repeated string nameHighlight = 3;
+  repeated string bodyHighlight = 4;
+}
+
+message SearchResponse { repeated NoteSearchItem items= 1; }
 
 service Storage {
   rpc GetNote(google.protobuf.Int32Value) returns (Note) {}
@@ -31,7 +38,6 @@ service Storage {
   rpc CreateDir(Dir) returns (google.rpc.Status) {}
   rpc DeleteDir(google.protobuf.Int32Value) returns (google.rpc.Status) {}
   rpc DeleteNote(google.protobuf.Int32Value) returns (google.rpc.Status) {}
-  rpc SearchNoteByName(google.protobuf.StringValue) returns (SearchResponse) {}
-  rpc SearchNoteByBody(google.protobuf.StringValue) returns (SearchResponse) {}
+  rpc SearchNote(google.protobuf.StringValue) returns (SearchResponse) {}
   rpc SearchDir(google.protobuf.StringValue) returns (SearchResponse) {}
 }

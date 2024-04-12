@@ -23,6 +23,32 @@ type Service struct {
 	client     storage.StorageClient
 }
 
+func (s *Service) SearchNote(
+	query models.SearchRequest,
+	ctx context.Context,
+) ([]models.NoteSearchItem, error) {
+	searchResult, err := s.client.SearchNote(ctx, &wrapperspb.StringValue{Value: query.Query})
+	if err != nil {
+		return []models.NoteSearchItem{}, fmt.Errorf(
+			"failed to get search result from storage service: %w",
+			err,
+		)
+	}
+
+	result := []models.NoteSearchItem{}
+
+	for _, item := range searchResult.Items {
+		result = append(result, models.NoteSearchItem{
+			NoteID:        int(item.GetId()),
+			Name:          item.GetName(),
+			BodyHighlight: item.GetBodyHighlight(),
+			NameHighlight: item.GetNameHighlight(),
+		})
+	}
+
+	return result, nil
+}
+
 func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error) {
 	if note.Name == "" {
 		note.Name = newNoteName
@@ -40,7 +66,7 @@ func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error)
 	})
 
 	if status.GetCode() != 204 {
-		return 0, fmt.Errorf("failed to store note data: %w", err)
+		return 0, fmt.Errorf("failed to indexing note data: %w", err)
 	}
 
 	return noteId, err
@@ -55,7 +81,7 @@ func (s *Service) DeleteNote(noteId int, ctx context.Context) error {
 	status, err := s.client.DeleteNote(ctx, &wrapperspb.Int32Value{Value: int32(noteId)})
 	if err != nil || status.GetCode() != 204 {
 		s.logger.Errorw(
-			"failed to delete note data from storage",
+			"failed to delete note data index from storage",
 			"id",
 			noteId,
 			"err",

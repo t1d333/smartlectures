@@ -12,4 +12,5 @@ type Service interface {
 	DeleteNote(noteId int, ctx context.Context) error
 	UpdateNote(note models.Note, ctx context.Context) error
 	GetNotesOverview(userId int, ctx context.Context) (models.NotesOverview, error)
+	SearchNote(req models.SearchRequest, ctx context.Context) ([]models.NoteSearchItem, error)
 }

@@ -95,7 +95,7 @@ paths:
       description: Обновление заметки.
       responses:
         '204':
-          description: Ответ при успешном запросе 
+          description: Ответ при успешном запросе
         '404':
           description: Ответ при попытке обновления не существующей заметки
           content:
@@ -134,6 +134,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
       tags: [notes]
+  /notes/search:
+    post:
+      summary: Поиск заметок
+      responses:
+        '200':
+          description: Ответ при успешном поиске
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteSearchResponse'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      tags: [notes]
   /dirs:
     post:
       summary: Создание папки
@@ -141,7 +163,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Dir' 
+              $ref: '#/components/schemas/Dir'
       responses:
         '200':
           description: Ответ при успешном выполнении запроса
@@ -180,7 +202,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
       tags: [dirs]
-
     put:
       summary: Обновление папки по ID
       parameters:
@@ -271,7 +292,6 @@ paths:
                   type: string
                   format: binary
       tags: [images]
-        
   /recognizer/formula:
     post:
       responses:
@@ -300,7 +320,6 @@ paths:
                   type: string
                   format: binary
       tags: [recognizer]
-        
   /recognizer/text:
     post:
       responses:
@@ -363,6 +382,44 @@ paths:
       tags: [recognizer]
 components:
   schemas:
+    NoteSearchResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoteSearchItem'
+      required: [items]
+    NoteSearchItem:
+      properties:
+        noteId:
+          type: number
+          format: int32
+          example: 1
+          x-isnullable: false
+        name:
+          type: string
+          description: Название заметки
+          example: TestName
+          x-isnullable: false
+        bodyHighlight:
+          type: array
+          items:
+            type: string
+        nameHighlight:
+          type: array
+          items:
+            type: string
+      required: [noteId, name, bodyHighlight, nameHighlight]
+    SearchRequest:
+      type: object
+      properties:
+        query:
+          type: string
+          description: Поисковый запрос
+          example: Новая заметка
+          x-isnullable: false
+      required: [query]
     Dir:
       type: object
       properties:
@@ -371,7 +428,7 @@ components:
           format: int32
           description: Числовой идентификатор папки
           example: 1337
-          x-isnullable: flase
+          x-isnullable: false
         name:
           type: string
           description: Название папки
@@ -382,17 +439,17 @@ components:
           format: int32
           description: Числовой идентификатор создателя папки
           example: 1337
-          x-isnullable: flase
+          x-isnullable: false
         parentDir:
           type: number
           format: int32
           description: Числовой идентификатор родительской папки
           example: 1337
-          x-isnullable: flase 
+          x-isnullable: false
         iconUrl:
           type: string
           description: Ссылка на URL иконки
-          example: ""
+          example: ''
           x-isnullable: false
         subdirs:
           x-isnullable: true
@@ -406,8 +463,8 @@ components:
           type: number
           format: int32
           description: ID заметки
-          example: 1337
-          x-isnullable: flase
+          example: 1
+          x-isnullable: false
         name:
           type: string
           description: |
@@ -433,12 +490,12 @@ components:
           format: int32
           description: ID папки, которой принадлежит заметка
           x-isnullable: false
-          example: 1337
+          example: 1
         userId:
           type: number
           format: int32
           description: ID пользователя, которому принадлежит заметка
-          example: 1337
+          example: 1
           x-isnullable: false
     NotePreview:
       type: object
@@ -448,7 +505,7 @@ components:
           format: int32
           description: ID заметки
           example: 1337
-          x-isnullable: flase
+          x-isnullable: false
         name:
           type: string
           description: |
@@ -501,4 +558,3 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Dir'
-              

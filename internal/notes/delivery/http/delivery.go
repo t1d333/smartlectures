@@ -31,6 +31,7 @@ func (d *Delivery) RegisterHandler() {
 	d.mux.POST("/api/v1/notes", d.CreateNote)
 	d.mux.DELETE("/api/v1/notes/:noteId", d.DeleteNote)
 	d.mux.PUT("/api/v1/notes/:noteId", d.UpdateNote)
+	d.mux.POST("/api/v1/notes/search", d.Search)
 }
 
 func (d *Delivery) GetNote(c *gin.Context) {
@@ -49,6 +50,26 @@ func (d *Delivery) GetNote(c *gin.Context) {
 		c.JSON(http.StatusOK, note)
 
 	}
+}
+
+func (d *Delivery) Search(c *gin.Context) {
+	req := models.SearchRequest{}
+	if err := c.BindJSON(&req); err != nil {
+		d.logger.Errorf("failed to decode search request: %w", err)
+		c.Error(errors.BadRequestError)
+		return
+	}
+
+	result, err := d.service.SearchNote(req, c.Request.Context())
+	if err != nil {
+		d.logger.Errorf("failed to search note %s", err)
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, models.NoteSearchResult{
+		Items: result,
+	})
 }
 
 func (d *Delivery) CreateNote(c *gin.Context) {
@@ -106,8 +127,8 @@ func (d *Delivery) UpdateNote(c *gin.Context) {
 	if noteId, err = strconv.Atoi(noteIdStr); err != nil {
 		c.Error(errors.BadRequestError)
 		return
-	} 
-	
+	}
+
 	if err := c.BindJSON(&note); err != nil {
 		d.logger.Errorf("failed to decode note: %w", err)
 		c.Error(errors.BadRequestError)

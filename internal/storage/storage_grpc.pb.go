@@ -31,8 +31,7 @@ type StorageClient interface {
 	CreateDir(ctx context.Context, in *Dir, opts ...grpc.CallOption) (*status.Status, error)
 	DeleteDir(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*status.Status, error)
 	DeleteNote(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*status.Status, error)
-	SearchNoteByName(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error)
-	SearchNoteByBody(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error)
+	SearchNote(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error)
 	SearchDir(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error)
 }
 
@@ -107,18 +106,9 @@ func (c *storageClient) DeleteNote(ctx context.Context, in *wrapperspb.Int32Valu
 	return out, nil
 }
 
-func (c *storageClient) SearchNoteByName(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error) {
+func (c *storageClient) SearchNote(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error) {
 	out := new(SearchResponse)
-	err := c.cc.Invoke(ctx, "/Storage/SearchNoteByName", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *storageClient) SearchNoteByBody(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error) {
-	out := new(SearchResponse)
-	err := c.cc.Invoke(ctx, "/Storage/SearchNoteByBody", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Storage/SearchNote", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -145,8 +135,7 @@ type StorageServer interface {
 	CreateDir(context.Context, *Dir) (*status.Status, error)
 	DeleteDir(context.Context, *wrapperspb.Int32Value) (*status.Status, error)
 	DeleteNote(context.Context, *wrapperspb.Int32Value) (*status.Status, error)
-	SearchNoteByName(context.Context, *wrapperspb.StringValue) (*SearchResponse, error)
-	SearchNoteByBody(context.Context, *wrapperspb.StringValue) (*SearchResponse, error)
+	SearchNote(context.Context, *wrapperspb.StringValue) (*SearchResponse, error)
 	SearchDir(context.Context, *wrapperspb.StringValue) (*SearchResponse, error)
 	mustEmbedUnimplementedStorageServer()
 }
@@ -176,11 +165,8 @@ func (UnimplementedStorageServer) DeleteDir(context.Context, *wrapperspb.Int32Va
 func (UnimplementedStorageServer) DeleteNote(context.Context, *wrapperspb.Int32Value) (*status.Status, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method DeleteNote not implemented")
 }
-func (UnimplementedStorageServer) SearchNoteByName(context.Context, *wrapperspb.StringValue) (*SearchResponse, error) {
-	return nil, status1.Errorf(codes.Unimplemented, "method SearchNoteByName not implemented")
-}
-func (UnimplementedStorageServer) SearchNoteByBody(context.Context, *wrapperspb.StringValue) (*SearchResponse, error) {
-	return nil, status1.Errorf(codes.Unimplemented, "method SearchNoteByBody not implemented")
+func (UnimplementedStorageServer) SearchNote(context.Context, *wrapperspb.StringValue) (*SearchResponse, error) {
+	return nil, status1.Errorf(codes.Unimplemented, "method SearchNote not implemented")
 }
 func (UnimplementedStorageServer) SearchDir(context.Context, *wrapperspb.StringValue) (*SearchResponse, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method SearchDir not implemented")
@@ -324,38 +310,20 @@ func _Storage_DeleteNote_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Storage_SearchNoteByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Storage_SearchNote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(wrapperspb.StringValue)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StorageServer).SearchNoteByName(ctx, in)
+		return srv.(StorageServer).SearchNote(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Storage/SearchNoteByName",
+		FullMethod: "/Storage/SearchNote",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StorageServer).SearchNoteByName(ctx, req.(*wrapperspb.StringValue))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Storage_SearchNoteByBody_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(wrapperspb.StringValue)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(StorageServer).SearchNoteByBody(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/Storage/SearchNoteByBody",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StorageServer).SearchNoteByBody(ctx, req.(*wrapperspb.StringValue))
+		return srv.(StorageServer).SearchNote(ctx, req.(*wrapperspb.StringValue))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -414,12 +382,8 @@ var Storage_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Storage_DeleteNote_Handler,
 		},
 		{
-			MethodName: "SearchNoteByName",
-			Handler:    _Storage_SearchNoteByName_Handler,
-		},
-		{
-			MethodName: "SearchNoteByBody",
-			Handler:    _Storage_SearchNoteByBody_Handler,
+			MethodName: "SearchNote",
+			Handler:    _Storage_SearchNote_Handler,
 		},
 		{
 			MethodName: "SearchDir",

@@ -15,6 +15,19 @@ type Service struct {
 	repository repository.Repository
 }
 
+func (*Service) SearchDir(ctx context.Context, query string) ([]models.Dir, error) {
+	panic("unimplemented")
+}
+
+func (s *Service) SearchNote(ctx context.Context, query string) ([]models.NoteSearchItem, error) {
+	result, err := s.repository.SearchNote(ctx, query)
+	if err != nil {
+		return []models.NoteSearchItem{}, fmt.Errorf("failed to search note in service: %w", err)
+	}
+
+	return result, nil
+}
+
 func (s *Service) GetNote(ctx context.Context, id int) (models.Note, error) {
 	note, err := s.repository.GetNote(ctx, id)
 	if err != nil {
@@ -40,10 +53,6 @@ func (s *Service) DeleteNote(ctx context.Context, id int) error {
 	}
 
 	return nil
-}
-
-func (s *Service) Search(ctx context.Context, query string) error {
-	panic("unimplemented")
 }
 
 func (s *Service) UpdateNote(ctx context.Context, note models.Note) error {
