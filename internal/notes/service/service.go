@@ -99,16 +99,16 @@ func (s *Service) GetNote(noteId int, ctx context.Context) (models.Note, error) 
 	if err != nil {
 		return note, fmt.Errorf("failed to get note in notes service: %w", err)
 	}
-
-	data, err := s.client.GetNote(ctx, &wrapperspb.Int32Value{
-		Value: int32(noteId),
-	})
-	if err != nil {
-		return note, fmt.Errorf("failed to get note data in service: %w", err)
-	}
-
-	note.Name = data.Name
-	note.Body = data.Body
+	//
+	// data, err := s.client.GetNote(ctx, &wrapperspb.Int32Value{
+	// 	Value: int32(noteId),
+	// })
+	// if err != nil {
+	// 	return note, fmt.Errorf("failed to get note data in service: %w", err)
+	// }
+	//
+	// note.Name = data.Name
+	// note.Body = data.Body
 
 	return note, err
 }

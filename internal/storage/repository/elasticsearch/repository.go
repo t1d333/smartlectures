@@ -30,56 +30,56 @@ func (r *Repository) SearchNote(
 ) ([]models.NoteSearchItem, error) {
 	var buf bytes.Buffer
 
-	// body := map[string]interface{}{
-	// 	"query": map[string]interface{}{
-	// 		"multi_match": map[string]interface{}{
-	// 			"query":     query,
-	// 			"fields":    []string{"name", "body"},
-	// 			"fuzziness": "AUTO",
-	// 		},
-	// 	},
-	// 	"highlight": map[string]interface{}{
-	// 		"fields": map[string]interface{}{
-	// 			"name": map[string]interface{}{
-	// 				"fragment_size": 50,
-	// 			},
-	// 			"body": map[string]interface{}{
-	// 				"fragment_size": 100,
-	// 			},
-	// 		},
-	// 	},
-	// }
-
 	body := map[string]interface{}{
-    "query": map[string]interface{}{
-        "bool": map[string]interface{}{
-            "should": []interface{}{
-                map[string]interface{}{
-                    "wildcard": map[string]interface{}{
-                        "field_name": "*query*",
-                    },
-                },
-                map[string]interface{}{
-                    "multi_match": map[string]interface{}{
-                        "query":     "текст запроса",
-                        "fields":    []string{"name", "body"},
-                        "fuzziness": "AUTO",
-                    },
-                },
-            },
-        },
-    },
-    "highlight": map[string]interface{}{
-        "fields": map[string]interface{}{
-            "name": map[string]interface{}{
-                "fragment_size": 50,
-            },
-            "body": map[string]interface{}{
-                "fragment_size": 100,
-            },
-        },
-    },
-}
+		"query": map[string]interface{}{
+			"multi_match": map[string]interface{}{
+				"query":     query,
+				"fields":    []string{"name", "body"},
+				"fuzziness": "AUTO",
+			},
+		},
+		"highlight": map[string]interface{}{
+			"fields": map[string]interface{}{
+				"name": map[string]interface{}{
+					"fragment_size": 50,
+				},
+				"body": map[string]interface{}{
+					"fragment_size": 100,
+				},
+			},
+		},
+	}
+
+	// 	body := map[string]interface{}{
+	//     "query": map[string]interface{}{
+	//         "bool": map[string]interface{}{
+	//             "should": []interface{}{
+	//                 map[string]interface{}{
+	//                     "wildcard": map[string]interface{}{
+	//                         "field_name": "*query*",
+	//                     },
+	//                 },
+	//                 map[string]interface{}{
+	//                     "multi_match": map[string]interface{}{
+	//                         "query":     "текст запроса",
+	//                         "fields":    []string{"name", "body"},
+	//                         "fuzziness": "AUTO",
+	//                     },
+	//                 },
+	//             },
+	//         },
+	//     },
+	//     "highlight": map[string]interface{}{
+	//         "fields": map[string]interface{}{
+	//             "name": map[string]interface{}{
+	//                 "fragment_size": 50,
+	//             },
+	//             "body": map[string]interface{}{
+	//                 "fragment_size": 100,
+	//             },
+	//         },
+	//     },
+	// }
 
 	if err := jsoniter.NewEncoder(&buf).Encode(&body); err != nil {
 		return []models.NoteSearchItem{}, fmt.Errorf("failed to create search request: %w", err)
