@@ -72,6 +72,7 @@ services:
       - ./scripts/postgres/default_user.sql:/docker-entrypoint-initdb.d/init2.sql
       - ./scripts/postgres/default_dir.sql:/docker-entrypoint-initdb.d/init3.sql
       - ./scripts/postgres/default_note.sql:/docker-entrypoint-initdb.d/init4.sql
+      - ./scripts/postgres/snippets.sql:/docker-entrypoint-initdb.d/init5.sql
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}

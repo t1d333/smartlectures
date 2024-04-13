@@ -380,8 +380,65 @@ paths:
                     type: string
                     format: binary
       tags: [recognizer]
+  /snippets:
+    get:
+      summary: Получение списка сниппетов
+      description: Получение списка сниппетов 
+      responses:
+        '200':
+          description: Ответ при успешном получнии списка сниппетов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSnippetsResponse'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags: [snippets]
+ 
 components:
   schemas:
+    GetSnippetsResponse:
+      type: object
+      properties:
+        snippets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Snippet'
+      required: [snippets]
+    Snippet:
+      type: object
+      properties:
+        snippetId:
+          type: number
+          format: int32
+          example: 1
+          x-isnullable: false
+        name:
+          type: string
+          description: Название сниппета
+          example: integral
+          x-isnullable: false
+        description:
+          type: string
+          description: Описание сниппета
+          example: Определенный интеграл
+          x-isnullable: false
+        body:
+          type: string
+          description: Тело сниппета
+          example: "```$$\\alpha$$```"
+          x-isnullable: false
+        userId:
+          type: number
+          description: ID владельца сниппета
+          format: int32
+          example: 1
+          x-isnullable: false
+      required: [snippetId, name, description, body, userId]
     NoteSearchResponse:
       type: object
       properties:

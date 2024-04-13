@@ -32,15 +32,28 @@ CREATE TABLE IF NOT EXISTS notes
 );
 
 
--- TRIGGERS
+CREATE TABLE IF NOT EXISTS snippets
+(
+    snippet_id  BIGSERIAL PRIMARY KEY,
+    name        VARCHAR(128) NOT NULL,
+    description TEXT DEFAULT '' NOT NULL, 
+    body        TEXT         NOT NULL DEFAULT '',
+    user_id     BIGINT REFERENCES users (user_id)  ON DELETE CASCADE DEFAULT NULL 
+);
 
-CREATE OR REPLACE FUNCTION update_note_repeated_num()
-RETURNS TRIGGER AS $$
+
+-- TRIGGERS
+create or replace function update_note_repeated_num()
+returns trigger
+as
+    $$
 BEGIN
     NEW.repeated_num = (SELECT COUNT(*) FROM notes WHERE name = NEW.name AND user_id = NEW.user_id AND parent_dir = NEW.parent_dir);
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$
+language plpgsql
+;
 
 
 CREATE TRIGGER update_note_repeated_num_trigger
@@ -48,17 +61,20 @@ BEFORE UPDATE ON notes
 FOR EACH ROW
 EXECUTE FUNCTION update_note_repeated_num();
 
-CREATE OR REPLACE FUNCTION update_dir_repeated_num()
-RETURNS TRIGGER AS $$
+create or replace function update_dir_repeated_num()
+returns trigger
+as
+    $$
 BEGIN
     NEW.repeated_num = (SELECT COUNT(*) FROM dirs WHERE name = NEW.name AND user_id = NEW.user_id AND parent_dir = NEW.parent_dir);
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$
+language plpgsql
+;
 
 
 CREATE TRIGGER update_dir_repeated_num_trigger
 BEFORE UPDATE ON dirs
 FOR EACH ROW
 EXECUTE FUNCTION update_dir_repeated_num();
-
