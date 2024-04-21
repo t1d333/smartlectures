@@ -56,7 +56,7 @@ func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error)
 
 	noteId, err := s.repository.CreateNote(note, ctx)
 	if err != nil {
-		err = fmt.Errorf("failed to create note in notes service: %w", err)
+		return noteId, fmt.Errorf("failed to create note in notes service: %w", err)
 	}
 
 	s.logger.Error(note.ParentDir)
@@ -78,7 +78,7 @@ func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error)
 func (s *Service) DeleteNote(noteId int, ctx context.Context) error {
 	err := s.repository.DeleteNote(noteId, ctx)
 	if err != nil {
-		err = fmt.Errorf("failed to delete note in notes service: %w", err)
+		return fmt.Errorf("failed to delete note in notes service: %w", err)
 	}
 
 	status, err := s.client.DeleteNote(ctx, &wrapperspb.Int32Value{Value: int32(noteId)})
@@ -94,7 +94,7 @@ func (s *Service) DeleteNote(noteId int, ctx context.Context) error {
 		)
 	}
 
-	return err
+	return nil
 }
 
 func (s *Service) GetNote(noteId int, ctx context.Context) (models.Note, error) {

@@ -39,7 +39,7 @@ func (s *Service) CreateDir(dir models.Dir, ctx context.Context) (int, error) {
 func (s *Service) DeleteDir(dirId int, ctx context.Context) error {
 	err := s.repository.DeleteDir(dirId, ctx)
 	if err != nil {
-		err = fmt.Errorf("failed to delete dir in dirs service: %w", err)
+		return fmt.Errorf("failed to delete dir in dirs service: %w", err)
 	}
 
 	status, _ := s.client.DeleteDir(ctx, &wrapperspb.Int32Value{Value: int32(dirId)})

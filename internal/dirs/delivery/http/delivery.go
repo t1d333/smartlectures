@@ -37,12 +37,12 @@ func (d *Delivery) GetDir(c *gin.Context) {
 	dirIdStr := c.Param("dirId")
 
 	if dirId, err := strconv.Atoi(dirIdStr); err != nil {
-		c.Error(errors.BadRequestError)
+		_ = c.Error(errors.BadRequestError)
 		return
 	} else {
 		dir, err := d.service.GetDir(dirId, c.Request.Context())
 		if err != nil {
-			c.Error(err)
+			_ = c.Error(err)
 			return
 		}
 
@@ -56,13 +56,13 @@ func (d *Delivery) CreateDir(c *gin.Context) {
 
 	if err := c.BindJSON(&dir); err != nil {
 		d.logger.Errorf("failed to decode dir: %w", err)
-		c.Error(errors.BadRequestError)
+		_ = c.Error(errors.BadRequestError)
 		return
 	}
 
 	dirId, err := d.service.CreateDir(dir, c.Request.Context())
 	if err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 
@@ -73,10 +73,10 @@ func (d *Delivery) DeleteDir(c *gin.Context) {
 	dirIdStr := c.Param("dirId")
 
 	if dirId, err := strconv.Atoi(dirIdStr); err != nil {
-		c.Error(errors.BadRequestError)
+		_ = c.Error(errors.BadRequestError)
 		return
 	} else if err := d.service.DeleteDir(dirId, c.Request.Context()); err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 
@@ -88,7 +88,7 @@ func (d *Delivery) GetDirsOverview(c *gin.Context) {
 
 	overview, err := d.service.GetDirsOverview(userId, c.Request.Context())
 	if err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 
@@ -102,20 +102,20 @@ func (d *Delivery) UpdateDir(c *gin.Context) {
 	var err error
 
 	if dirId, err = strconv.Atoi(dirIdStr); err != nil {
-		c.Error(errors.BadRequestError)
+		_ = c.Error(errors.BadRequestError)
 		return
 	}
 
 	if err := c.BindJSON(&dir); err != nil {
 		d.logger.Errorf("failed to decode dir: %w", err)
-		c.Error(errors.BadRequestError)
+		_ = c.Error(errors.BadRequestError)
 		return
 	}
 
 	dir.DirId = dirId
 
 	if err := d.service.UpdateDir(dir, c.Request.Context()); err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 

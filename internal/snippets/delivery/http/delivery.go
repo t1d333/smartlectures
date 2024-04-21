@@ -38,7 +38,7 @@ func (d *Delivery) GetSnippets(c *gin.Context) {
 
 	snippets, err := d.service.GetSnippets(userId, c.Request.Context())
 	if err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 

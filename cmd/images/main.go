@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -31,9 +30,8 @@ func main() {
 	// TODO: lower multipart form size
 	router := gin.Default()
 
-	router.Use(cors.Default())
-
 	router.Use(middl.ErrorHandler)
+	router.Use(cors.Default())
 
 	rep, err := s3.NewRepository(logger, appCfg)
 	if err != nil {
@@ -46,10 +44,9 @@ func main() {
 
 	del.RegisterHandler()
 
-	fmt.Printf("%s:%d", appCfg.Address, appCfg.Port)
 	srv := &http.Server{
 		// Addr:    fmt.Sprintf("%s:%d", appCfg.Address, appCfg.Port),
-		Addr: ":8000",
+		Addr:    ":8000",
 		Handler: router,
 	}
 

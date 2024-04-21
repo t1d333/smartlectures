@@ -2,7 +2,6 @@ package middl
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,6 @@ func ErrorHandler(c *gin.Context) {
 
 	if customErr != nil {
 		c.JSON(customErr.HttpCode(), gin.H{"msg": customErr.ResponseMsg()})
-		fmt.Println(customErr.Error())
 	} else if c.Errors.Last() != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": "internal server error"})
 	}

@@ -34,8 +34,8 @@ func (d *Delivery) UploadImage(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["image"]
 
-	if len(files) != 1 {
-		c.Error(errors.BadRequestError)
+	if len(files) < 1 {
+		_ = c.Error(errors.BadRequestError)
 		return
 	}
 
@@ -47,7 +47,7 @@ func (d *Delivery) UploadImage(c *gin.Context) {
 
 	src, err := d.service.UploadImage(reader, c.Request.Context())
 	if err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 

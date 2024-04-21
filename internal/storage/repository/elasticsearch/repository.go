@@ -130,13 +130,13 @@ func (r *Repository) GetNote(ctx context.Context, id int) (models.Note, error) {
 	}
 
 	var body bytes.Buffer
-	body.ReadFrom(res.Body)
+	
 
-	if err != nil {
+	if _, err = body.ReadFrom(res.Body); err != nil {
 		return models.Note{}, fmt.Errorf("failed to read note: %w", err)
 	}
 
-	if jsoniter.Unmarshal(body.Bytes(), &data); err != nil {
+	if err := jsoniter.Unmarshal(body.Bytes(), &data); err != nil {
 		return models.Note{}, fmt.Errorf("failed to unmarshal note: %w", err)
 	}
 

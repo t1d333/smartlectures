@@ -40,5 +40,11 @@ func main() {
 	logger.Info("starting grpc server on port 50051...")
 	grpcServer := grpc.NewServer(opts...)
 	storage.RegisterStorageServer(grpcServer, del)
-	grpcServer.Serve(lis)
+	
+
+	if err = grpcServer.Serve(lis); err != nil {
+		logger.Fatal("failed to start grpc server", err)
+		
+	}
+	
 }

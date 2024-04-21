@@ -35,7 +35,7 @@ func (d *Delivery) RecognizeFormula(c *gin.Context) {
 	files := form.File["image"]
 
 	if len(files) != 1 {
-		c.Error(errors.BadRequestError)
+		_ = c.Error(errors.BadRequestError)
 		return
 	}
 
@@ -46,7 +46,7 @@ func (d *Delivery) RecognizeFormula(c *gin.Context) {
 
 	formula, err := d.service.RecognizeFormula(data, c.Request.Context())
 	if err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 
@@ -57,7 +57,7 @@ func (d *Delivery) RecognizeText(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["images"]
 	if len(files) != 1 {
-		c.Error(errors.BadRequestError)
+		_ = c.Error(errors.BadRequestError)
 		return
 	}
 
@@ -68,7 +68,7 @@ func (d *Delivery) RecognizeText(c *gin.Context) {
 
 	text, err := d.service.RecognizeText([][]byte{data}, c.Request.Context())
 	if err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 
@@ -79,7 +79,7 @@ func (d *Delivery) RecognizeMixed(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["images"]
 	if len(files) != 1 {
-		c.Error(errors.BadRequestError)
+		_ = c.Error(errors.BadRequestError)
 		return
 	}
 
@@ -90,7 +90,7 @@ func (d *Delivery) RecognizeMixed(c *gin.Context) {
 
 	text, err := d.service.RecognizeMixed([][]byte{data}, c.Request.Context())
 	if err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 
