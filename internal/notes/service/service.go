@@ -59,10 +59,13 @@ func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error)
 		err = fmt.Errorf("failed to create note in notes service: %w", err)
 	}
 
+	s.logger.Error(note.ParentDir)
+	
 	status, err := s.client.CreateNote(ctx, &storage.Note{
-		Id:   int32(noteId),
-		Name: note.Name,
-		Body: note.Body,
+		Id:        int32(noteId),
+		Name:      note.Name,
+		Body:      note.Body,
+		ParentDir: int32(note.ParentDir),
 	})
 
 	if status.GetCode() != 204 {
@@ -99,16 +102,6 @@ func (s *Service) GetNote(noteId int, ctx context.Context) (models.Note, error) 
 	if err != nil {
 		return note, fmt.Errorf("failed to get note in notes service: %w", err)
 	}
-	//
-	// data, err := s.client.GetNote(ctx, &wrapperspb.Int32Value{
-	// 	Value: int32(noteId),
-	// })
-	// if err != nil {
-	// 	return note, fmt.Errorf("failed to get note data in service: %w", err)
-	// }
-	//
-	// note.Name = data.Name
-	// note.Body = data.Body
 
 	return note, err
 }
@@ -134,6 +127,7 @@ func (s *Service) UpdateNote(note models.Note, ctx context.Context) error {
 		Name: note.Name,
 		Body: note.Body,
 		Id:   int32(note.NoteId),
+		ParentDir:   int32(note.ParentDir),
 	})
 	if status.Code != 204 || err != nil {
 		return fmt.Errorf("failed to update note data in storage: %w", err)

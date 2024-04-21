@@ -20,6 +20,46 @@ type Repository struct {
 	logger logger.Logger
 }
 
+func NewRepository(logger logger.Logger) (repository.Repository, error) {
+	client, err := elastic.NewDefaultClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create elastic client: %w", err)
+	}
+
+	_, err = client.Ping()
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to elasticsearch: %w", err)
+	}
+
+	return &Repository{
+		client: client,
+		logger: logger,
+	}, nil
+}
+
+func (r *Repository) DeleteDir(ctx context.Context, id int) error {
+	var buf bytes.Buffer
+	body := buildDeleteNotesByDirReqBody(id)
+	if err := jsoniter.NewEncoder(&buf).Encode(&body); err != nil {
+		return fmt.Errorf("failed to create delete request: %w", err)
+	}
+
+	req := esapi.DeleteByQueryRequest{
+		Index: []string{"notes"},
+		Body:  &buf,
+	}
+	
+	res, err := req.Do(ctx, r.client)
+	
+	if err != nil {
+		return fmt.Errorf("failed to make delete dir request: %w", err)
+	}
+
+	r.logger.Infof("result %v", res)
+
+	return nil
+}
+
 func (*Repository) SearchDir(ctx context.Context, query string) ([]int, error) {
 	panic("unimplemented")
 }
@@ -30,56 +70,7 @@ func (r *Repository) SearchNote(
 ) ([]models.NoteSearchItem, error) {
 	var buf bytes.Buffer
 
-	body := map[string]interface{}{
-		"query": map[string]interface{}{
-			"multi_match": map[string]interface{}{
-				"query":     query,
-				"fields":    []string{"name", "body"},
-				"fuzziness": "AUTO",
-			},
-		},
-		"highlight": map[string]interface{}{
-			"fields": map[string]interface{}{
-				"name": map[string]interface{}{
-					"fragment_size": 50,
-				},
-				"body": map[string]interface{}{
-					"fragment_size": 100,
-				},
-			},
-		},
-	}
-
-	// 	body := map[string]interface{}{
-	//     "query": map[string]interface{}{
-	//         "bool": map[string]interface{}{
-	//             "should": []interface{}{
-	//                 map[string]interface{}{
-	//                     "wildcard": map[string]interface{}{
-	//                         "field_name": "*query*",
-	//                     },
-	//                 },
-	//                 map[string]interface{}{
-	//                     "multi_match": map[string]interface{}{
-	//                         "query":     "текст запроса",
-	//                         "fields":    []string{"name", "body"},
-	//                         "fuzziness": "AUTO",
-	//                     },
-	//                 },
-	//             },
-	//         },
-	//     },
-	//     "highlight": map[string]interface{}{
-	//         "fields": map[string]interface{}{
-	//             "name": map[string]interface{}{
-	//                 "fragment_size": 50,
-	//             },
-	//             "body": map[string]interface{}{
-	//                 "fragment_size": 100,
-	//             },
-	//         },
-	//     },
-	// }
+	body := buildSearchNoteReqBody(query)
 
 	if err := jsoniter.NewEncoder(&buf).Encode(&body); err != nil {
 		return []models.NoteSearchItem{}, fmt.Errorf("failed to create search request: %w", err)
@@ -117,23 +108,6 @@ func (r *Repository) SearchNote(
 	}
 
 	return result, nil
-}
-
-func NewRepository(logger logger.Logger) (repository.Repository, error) {
-	client, err := elastic.NewDefaultClient()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create elastic client: %w", err)
-	}
-
-	_, err = client.Ping()
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to elasticsearch: %w", err)
-	}
-
-	return &Repository{
-		client: client,
-		logger: logger,
-	}, nil
 }
 
 func (r *Repository) GetNote(ctx context.Context, id int) (models.Note, error) {
@@ -190,7 +164,6 @@ func (r *Repository) CreateNote(ctx context.Context, note models.Note) error {
 }
 
 func (r *Repository) UpdateNote(ctx context.Context, note models.Note) error {
-	r.logger.Info(note)
 	body, err := jsoniter.Marshal(note)
 	if err != nil {
 		return fmt.Errorf("failed to marshal note: %w", err)
@@ -215,7 +188,6 @@ func (r *Repository) UpdateNote(ctx context.Context, note models.Note) error {
 }
 
 func (r *Repository) DeleteNote(ctx context.Context, id int) error {
-	r.logger.Info(id)
 	req := esapi.DeleteRequest{
 		Index:      "notes",
 		DocumentID: strconv.Itoa(id),

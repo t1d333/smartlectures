@@ -8,6 +8,7 @@ message Note {
   int32 id = 1;
   string name = 2;
   string body = 3;
+  int32 parentDir = 4;
 }
 
 message Dir {
@@ -19,6 +20,7 @@ message NoteUpdateRequest {
   string name = 1;
   string body = 2;
   int32 id = 3;
+  int32 parentDir = 4;
 }
 
 message NoteSearchItem {
@@ -28,7 +30,7 @@ message NoteSearchItem {
   repeated string bodyHighlight = 4;
 }
 
-message SearchResponse { repeated NoteSearchItem items= 1; }
+message SearchResponse { repeated NoteSearchItem items = 1; }
 
 service Storage {
   rpc GetNote(google.protobuf.Int32Value) returns (Note) {}

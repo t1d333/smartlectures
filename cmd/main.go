@@ -21,11 +21,9 @@ import (
 	notesServ "github.com/t1d333/smartlectures/internal/notes/service"
 	storage "github.com/t1d333/smartlectures/internal/storage"
 
-
 	snippetsDel "github.com/t1d333/smartlectures/internal/snippets/delivery/http"
 	snippetsRep "github.com/t1d333/smartlectures/internal/snippets/repository/pg"
 	snippetsServ "github.com/t1d333/smartlectures/internal/snippets/service"
-	
 
 	dirsDel "github.com/t1d333/smartlectures/internal/dirs/delivery/http"
 	dirsRep "github.com/t1d333/smartlectures/internal/dirs/repository/pg"
@@ -97,21 +95,18 @@ func main() {
 
 	// dirs
 	dirsRep := dirsRep.NewRepository(logger, pool)
-	dirsServ := dirsServ.NewService(logger, dirsRep)
+	dirsServ := dirsServ.NewService(logger, dirsRep, storageClient)
 	dirsDel := dirsDel.NewDelivery(logger, router, dirsServ)
 
 	dirsDel.RegisterHandler()
 
-	// snippets 
+	// snippets
 
-	
 	snipRep := snippetsRep.NewRepository(logger, pool)
 	snipServ := snippetsServ.NewService(logger, snipRep)
 	snipDel := snippetsDel.NewDelivery(logger, router, snipServ)
 
 	snipDel.RegisterHandler()
-
-
 
 	// recognizer
 
@@ -119,8 +114,6 @@ func main() {
 	recognizerDel := recDel.NewDelivery(logger, router, recognizerServ)
 
 	recognizerDel.RegisterHandler()
-
-
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

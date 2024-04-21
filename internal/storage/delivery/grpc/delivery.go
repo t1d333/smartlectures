@@ -57,7 +57,12 @@ func (*Delivery) CreateDir(context.Context, *storage.Dir) (*status.Status, error
 func (d *Delivery) CreateNote(ctx context.Context, note *storage.Note) (*status.Status, error) {
 	err := d.service.CreateNote(
 		ctx,
-		models.Note{NoteId: int(note.Id), Body: note.Body, Name: note.Name},
+		models.Note{
+			NoteId:    int(note.GetId()),
+			Body:      note.GetBody(),
+			Name:      note.GetName(),
+			ParentDir: int(note.GetParentDir()),
+		},
 	)
 	if err != nil {
 		return &status.Status{
@@ -69,8 +74,22 @@ func (d *Delivery) CreateNote(ctx context.Context, note *storage.Note) (*status.
 	return &status.Status{Code: 204}, nil
 }
 
-func (*Delivery) DeleteDir(context.Context, *wrapperspb.Int32Value) (*status.Status, error) {
-	panic("unimplemented")
+func (d *Delivery) DeleteDir(
+	ctx context.Context,
+	v *wrapperspb.Int32Value,
+) (*status.Status, error) {
+	err := d.service.DeleteDir(ctx, int(v.GetValue()))
+	if err != nil {
+
+		d.logger.Error(err)
+		return &status.Status{
+			Code: 500,
+		}, nil
+	}
+
+	return &status.Status{
+		Code: 204,
+	}, nil
 }
 
 func (d *Delivery) DeleteNote(
@@ -121,7 +140,12 @@ func (d *Delivery) UpdateNote(
 ) (*status.Status, error) {
 	err := d.service.UpdateNote(
 		ctx,
-		models.Note{NoteId: int(req.GetId()), Name: req.GetName(), Body: req.GetBody()},
+		models.Note{
+			NoteId:    int(req.GetId()),
+			Name:      req.GetName(),
+			Body:      req.GetBody(),
+			ParentDir: int(req.GetParentDir()),
+		},
 	)
 	if err != nil {
 		d.logger.Error(err)

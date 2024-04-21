@@ -15,6 +15,15 @@ type Service struct {
 	repository repository.Repository
 }
 
+func (s *Service) DeleteDir(ctx context.Context, id int) error {
+	err := s.repository.DeleteDir(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete dir in service: %w", err)
+	}
+
+	return nil
+}
+
 func (*Service) SearchDir(ctx context.Context, query string) ([]models.Dir, error) {
 	panic("unimplemented")
 }

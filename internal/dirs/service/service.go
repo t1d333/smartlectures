@@ -8,6 +8,9 @@ import (
 	"github.com/t1d333/smartlectures/internal/dirs/repository"
 	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/pkg/logger"
+	"google.golang.org/protobuf/types/known/wrapperspb"
+
+	storage "github.com/t1d333/smartlectures/internal/storage"
 )
 
 const (
@@ -17,6 +20,7 @@ const (
 type Service struct {
 	logger     logger.Logger
 	repository repository.Repository
+	client     storage.StorageClient
 }
 
 func (s *Service) CreateDir(dir models.Dir, ctx context.Context) (int, error) {
@@ -38,7 +42,13 @@ func (s *Service) DeleteDir(dirId int, ctx context.Context) error {
 		err = fmt.Errorf("failed to delete dir in dirs service: %w", err)
 	}
 
-	return err
+	status, _ := s.client.DeleteDir(ctx, &wrapperspb.Int32Value{Value: int32(dirId)})
+
+	if status.Code != 204 {
+		return fmt.Errorf("failed to delete dir from index: %s", status.Message)
+	} 
+
+	return nil
 }
 
 func (s *Service) GetDir(dirId int, ctx context.Context) (models.Dir, error) {
@@ -68,9 +78,15 @@ func (s *Service) UpdateDir(dir models.Dir, ctx context.Context) error {
 	return err
 }
 
-func NewService(logger logger.Logger, repository repository.Repository) dirs.Service {
+func NewService(
+	logger logger.Logger,
+	repository repository.Repository,
+	client storage.StorageClient,
+) dirs.Service {
 	return &Service{
 		logger:     logger,
 		repository: repository,
+
+		client: client,
 	}
 }

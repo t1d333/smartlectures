@@ -19,7 +19,7 @@ services:
     ports: [8000:8000]
     environment: ['DB_URL=${DB_URL}', 'PORT=${PORT}}']
     networks: [backend]
-    depends_on: [postgres, redis, recognizer, storage]
+    depends_on: [postgres, recognizer, storage]
     restart: always
   images:
     container_name: images
@@ -56,13 +56,13 @@ services:
     environment: [SWAGGER_JSON=/docs/swagger.yml]
     volumes: [./docs:/docs]
     networks: [swagger]
-  redis:
-    container_name: redis
-    image: redis:7.2.4
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - REDIS_PORT=${REDIS_PORT}
-    networks: [backend]
+  # redis:
+  #   container_name: redis
+  #   image: redis:7.2.4
+  #   environment:
+  #     - REDIS_PASSWORD=${REDIS_PASSWORD}
+  #     - REDIS_PORT=${REDIS_PORT}
+  #   networks: [backend]
   postgres:
     container_name: postgres
     image: postgres:16
