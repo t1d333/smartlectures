@@ -7,10 +7,9 @@ import (
 	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/internal/notes"
 	"github.com/t1d333/smartlectures/internal/notes/repository"
+	storage "github.com/t1d333/smartlectures/internal/storage"
 	"github.com/t1d333/smartlectures/pkg/logger"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-
-	storage "github.com/t1d333/smartlectures/internal/storage"
 )
 
 const (
@@ -60,7 +59,7 @@ func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error)
 	}
 
 	s.logger.Error(note.ParentDir)
-	
+
 	status, err := s.client.CreateNote(ctx, &storage.Note{
 		Id:        int32(noteId),
 		Name:      note.Name,
@@ -124,10 +123,10 @@ func (s *Service) UpdateNote(note models.Note, ctx context.Context) error {
 	}
 
 	status, err := s.client.UpdateNote(ctx, &storage.NoteUpdateRequest{
-		Name: note.Name,
-		Body: note.Body,
-		Id:   int32(note.NoteId),
-		ParentDir:   int32(note.ParentDir),
+		Name:      note.Name,
+		Body:      note.Body,
+		Id:        int32(note.NoteId),
+		ParentDir: int32(note.ParentDir),
 	})
 	if status.Code != 204 || err != nil {
 		return fmt.Errorf("failed to update note data in storage: %w", err)

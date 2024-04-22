@@ -30,7 +30,7 @@ func main() {
 	// TODO: lower multipart form size
 	router := gin.Default()
 
-	router.Use(middl.ErrorHandler)
+	router.Use(middl.NewErrorHandler(logger))
 	router.Use(cors.Default())
 
 	rep, err := s3.NewRepository(logger, appCfg)

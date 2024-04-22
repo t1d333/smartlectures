@@ -42,7 +42,7 @@ func main() {
 
 	router.Use(cors.Default())
 
-	router.Use(middl.ErrorHandler)
+	router.Use(middl.NewErrorHandler(logger))
 
 	srv := &http.Server{
 		Addr:    ":8000",

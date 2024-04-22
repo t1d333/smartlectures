@@ -1,14 +1,18 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"image/jpeg"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/t1d333/smartlectures/internal/recognizer"
 	"github.com/t1d333/smartlectures/pkg/logger"
+
+	"github.com/karmdip-mi/go-fitz"
 )
 
 type Service struct {
@@ -41,6 +45,32 @@ func (s *Service) RecognizeText(imgs [][]byte, ctx context.Context) (string, err
 	}
 
 	return result.GetResult(), nil
+}
+
+func (s *Service) ImportPdf(file []byte, ctx context.Context) (string, error) {
+	reader := bytes.NewReader(file)
+	doc, err := fitz.NewFromReader(reader)
+	imgs := [][]byte{}
+	if err != nil {
+		return "", fmt.Errorf("failed to read pdf file: %w", err)
+	}
+
+	for n := 0; n < doc.NumPage(); n++ {
+		buf := bytes.NewBuffer([]byte{})
+		img, err := doc.Image(n)
+
+		if err != nil {
+			return "", fmt.Errorf("failed to convert %d page to image: %w", n, err)
+		}
+
+		if err = jpeg.Encode(buf, img, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
+			return "", fmt.Errorf("failed to encode jpeg page: %w", err)
+		}
+
+		imgs = append(imgs, buf.Bytes())
+	}
+
+	return s.RecognizeMixed(imgs, ctx)
 }
 
 func NewService(logger logger.Logger, address string) recognizer.Service {

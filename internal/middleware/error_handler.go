@@ -6,21 +6,27 @@ import (
 
 	"github.com/gin-gonic/gin"
 	customErrors "github.com/t1d333/smartlectures/internal/errors"
+	"github.com/t1d333/smartlectures/pkg/logger"
 )
 
-func ErrorHandler(c *gin.Context) {
-	c.Next()
+func NewErrorHandler(logger logger.Logger) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		c.Next()
 
-	var customErr *customErrors.Error
-	for _, err := range c.Errors {
-		if errors.As(err, &customErr) {
-			break
+		if len(c.Errors) == 0 {
+			return
 		}
-	}
 
-	if customErr != nil {
-		c.JSON(customErr.HttpCode(), gin.H{"msg": customErr.ResponseMsg()})
-	} else if c.Errors.Last() != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"msg": "internal server error"})
+		var customErr *customErrors.Error
+
+		err := c.Errors[0]
+
+		logger.Error(err)
+
+		if errors.As(err, &customErr) {
+			c.JSON(customErr.HttpCode(), gin.H{"msg": customErr.ResponseMsg()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"msg": "internal server error"})
+		}
 	}
 }

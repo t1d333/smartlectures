@@ -7,16 +7,24 @@ RUN go mod download
 
 COPY ./ ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -tags=jsoniter -o server ./cmd/main.go 
+RUN GOOS=linux go build -tags=jsoniter -o server ./cmd/main.go 
 
-FROM gcr.io/distroless/base-debian11 AS build-release-stage
+FROM debian:bookworm AS build-release-stage
+
+ARG USERNAME=nonroot
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && chown -R $USER_UID:$USER_GID /home/$USERNAME
 
 WORKDIR /
 
-COPY --from=build-stage /app/server /server
+COPY --from=build-stage /app/server /nonroot/server
 
 EXPOSE 8000
 
-USER nonroot:nonroot
+USER nonroot
 
-ENTRYPOINT ["./server"]
+ENTRYPOINT ["./nonroot/server"]

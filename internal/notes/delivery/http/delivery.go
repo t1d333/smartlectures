@@ -1,10 +1,12 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/russross/blackfriday/v2"
 	"github.com/t1d333/smartlectures/internal/errors"
 	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/internal/notes"
@@ -32,6 +34,8 @@ func (d *Delivery) RegisterHandler() {
 	d.mux.DELETE("/api/v1/notes/:noteId", d.DeleteNote)
 	d.mux.PUT("/api/v1/notes/:noteId", d.UpdateNote)
 	d.mux.POST("/api/v1/notes/search", d.Search)
+	d.mux.GET("/api/v1/notes/:noteId/download/pdf", d.ExportPdf)
+	d.mux.GET("/api/v1/notes/:noteId/download/md", d.ExportMd)
 }
 
 func (d *Delivery) GetNote(c *gin.Context) {
@@ -143,4 +147,65 @@ func (d *Delivery) UpdateNote(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func (d *Delivery) ExportMd(c *gin.Context) {
+	noteIdStr := c.Param("noteId")
+
+	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
+		_ = c.Error(errors.BadRequestError)
+		return
+	} else {
+		note, err := d.service.GetNote(noteId, c.Request.Context())
+		if err != nil {
+			_ = c.Error(err)
+			return
+		}
+
+		c.Header("Content-Disposition", "attachment; filename="+fmt.Sprintf("%s.md", note.Name))
+
+		c.Data(http.StatusOK, "text/markdown", []byte(note.Body))
+	}
+}
+
+func (d *Delivery) ExportPdf(c *gin.Context) {
+	noteIdStr := c.Param("noteId")
+
+	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
+		_ = c.Error(errors.BadRequestError)
+		return
+	} else {
+		note, err := d.service.GetNote(noteId, c.Request.Context())
+		if err != nil {
+			_ = c.Error(err)
+			return
+		}
+
+		html := blackfriday.Run([]byte(note.Body))
+		d.logger.Info(string(html))
+		// pdf := gofpdf.New("P", "mm", "A4", "")
+		// c.Header("Content-Disposition", "attachment; filename=output.pdf")
+		// c.Header("Content-Type", "application/pdf")
+		// c.Writer.WriteHeader(http.StatusOK)
+		// if err := pdf.New.Output(c.Writer); err != nil {
+		// 	c.AbortWithError(http.StatusInternalServerError, err)
+		// 	return
+		// }
+
+	}
+}
+
+func (d *Delivery) ImportMd(c *gin.Context) {
+	form, _ := c.MultipartForm()
+	files := form.File["data"]
+
+	if len(files) != 1 {
+		_ = c.Error(errors.BadRequestError)
+		return
+	}
+
+	file, _ := files[0].Open()
+	defer file.Close()
+
+	// rawData, _ := io.ReadAll(file)
 }

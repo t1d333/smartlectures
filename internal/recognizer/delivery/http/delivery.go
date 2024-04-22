@@ -28,6 +28,7 @@ func (d *Delivery) RegisterHandler() {
 	d.mux.POST("/api/v1/recognizer/formula", d.RecognizeFormula)
 	d.mux.POST("/api/v1/recognizer/text", d.RecognizeText)
 	d.mux.POST("/api/v1/recognizer/mixed", d.RecognizeMixed)
+	d.mux.POST("/api/v1/recognizer/pdf", d.ImportPdf)
 }
 
 func (d *Delivery) RecognizeFormula(c *gin.Context) {
@@ -95,4 +96,27 @@ func (d *Delivery) RecognizeMixed(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"text": text})
+}
+
+func (d *Delivery) ImportPdf(c *gin.Context) {
+	form, _ := c.MultipartForm()
+	files := form.File["data"]
+
+	if len(files) != 1 {
+		_ = c.Error(errors.BadRequestError)
+		return
+	}
+
+	file, _ := files[0].Open()
+	defer file.Close()
+
+	rawData, _ := io.ReadAll(file)
+
+	data, err := d.service.ImportPdf(rawData, c.Request.Context())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.JSON(200, map[string]string{"text": data})
 }
