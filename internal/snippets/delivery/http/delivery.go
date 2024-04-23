@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	// "github.com/t1d333/smartlectures/internal/errors"
 	// "github.com/t1d333/smartlectures/internal/models"
+	"github.com/t1d333/smartlectures/internal/errors"
+	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/internal/snippets"
 	"github.com/t1d333/smartlectures/pkg/logger"
 )
@@ -30,7 +32,7 @@ func (d *Delivery) RegisterHandler() {
 	d.mux.POST("/api/v1/snippets", d.CreateSnippet)
 	d.mux.DELETE("/api/v1/snippets/:snippetId", d.DeleteSnippet)
 	d.mux.PUT("/api/v1/snippets/:snippetId", d.UpdateSnippet)
-	d.mux.POST("/api/v1/snippets/search", d.UpdateSnippet)
+	d.mux.POST("/api/v1/snippets/search", d.SearchSnippet)
 }
 
 func (d *Delivery) GetSnippets(c *gin.Context) {
@@ -59,4 +61,23 @@ func (d *Delivery) DeleteSnippet(c *gin.Context) {
 
 func (d *Delivery) UpdateSnippet(c *gin.Context) {
 	c.Status(http.StatusNoContent)
+}
+
+func (d *Delivery) SearchSnippet(c *gin.Context) {
+	req := models.SearchRequest{}
+	if err := c.BindJSON(&req); err != nil {
+		d.logger.Errorf("failed to decode search request: %w", err)
+		_ = c.Error(errors.BadRequestError)
+		return
+	}
+
+	result, err := d.service.SearchSnippet(req.Query, c.Request.Context())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, models.SnippetSearchResult{
+		Items: result,
+	})
 }

@@ -20,6 +20,49 @@ type Repository struct {
 	logger logger.Logger
 }
 
+func (r *Repository) SearchSnippet(ctx context.Context, query string) ([]models.Snippet, error) {
+	var buf bytes.Buffer
+
+	body := buildSearchSnippetReqBody(query)
+
+	r.logger.Infof("%s", query)
+
+	if err := jsoniter.NewEncoder(&buf).Encode(&body); err != nil {
+		return []models.Snippet{}, fmt.Errorf("failed to create snippet search request: %w", err)
+	}
+
+	res, err := r.client.Search(
+		r.client.Search.WithContext(ctx),
+		r.client.Search.WithIndex("snippets"),
+		r.client.Search.WithBody(strings.NewReader(buf.String())),
+		r.client.Search.WithTrackTotalHits(true),
+		r.client.Search.WithPretty(),
+	)
+	if err != nil {
+		return []models.Snippet{}, fmt.Errorf("failed to make snippet search request: %w", err)
+	}
+
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return []models.Snippet{}, fmt.Errorf("failed to search snippet")
+	}
+
+	var response SnippetSearchResponse
+	r.logger.Info(res.String())
+	if err := jsoniter.NewDecoder(res.Body).Decode(&response); err != nil {
+		return []models.Snippet{}, fmt.Errorf("failed to decode search result: %w", err)
+	}
+
+	result := []models.Snippet{}
+
+	for _, hit := range response.Hits.Hits {
+		result = append(result, hit.Source)
+	}
+
+	return result, nil
+}
+
 func NewRepository(logger logger.Logger) (repository.Repository, error) {
 	client, err := elastic.NewDefaultClient()
 	if err != nil {
@@ -48,9 +91,8 @@ func (r *Repository) DeleteDir(ctx context.Context, id int) error {
 		Index: []string{"notes"},
 		Body:  &buf,
 	}
-	
+
 	res, err := req.Do(ctx, r.client)
-	
 	if err != nil {
 		return fmt.Errorf("failed to make delete dir request: %w", err)
 	}
@@ -130,7 +172,6 @@ func (r *Repository) GetNote(ctx context.Context, id int) (models.Note, error) {
 	}
 
 	var body bytes.Buffer
-	
 
 	if _, err = body.ReadFrom(res.Body); err != nil {
 		return models.Note{}, fmt.Errorf("failed to read note: %w", err)

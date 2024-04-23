@@ -11,5 +11,5 @@ type Service interface {
 	CreateSnippet(snippet models.Snippet, ctx context.Context) (int, error)
 	DeleteSnippet(snippetId int, ctx context.Context) error
 	UpdateSnippet(note models.Snippet, ctx context.Context) error
-	SearchSnippet(req models.SearchRequest, ctx context.Context) ([]models.NoteSearchItem, error)
+	SearchSnippet(query string, ctx context.Context) ([]models.Snippet, error)
 }

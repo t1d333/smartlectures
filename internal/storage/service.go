@@ -14,4 +14,5 @@ type Service interface {
 	DeleteDir(ctx context.Context, id int) error
 	SearchNote(ctx context.Context, query string) ([]models.NoteSearchItem, error)
 	SearchDir(ctx context.Context, query string) ([]models.Dir, error)
+	SearchSnippet(ctx context.Context, query string) ([]models.Snippet, error)
 }

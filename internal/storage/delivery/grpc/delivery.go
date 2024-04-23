@@ -50,6 +50,32 @@ func (*Delivery) SearchDir(
 	panic("unimplemented")
 }
 
+func (d *Delivery) SearchSnippet(
+	ctx context.Context,
+	query *wrapperspb.StringValue,
+) (*storage.SearchSnippetResponse, error) {
+	searchItems, err := d.service.SearchSnippet(ctx, query.GetValue())
+	if err != nil {
+		return nil, fmt.Errorf("failed to search note: %w", err)
+	}
+
+	result := &storage.SearchSnippetResponse{
+		Items: []*storage.Snippet{},
+	}
+
+	for _, item := range searchItems {
+		result.Items = append(result.Items, &storage.Snippet{
+			SnippetId:   int32(item.SnippetID),
+			Name:        item.Name,
+			Description: item.Description,
+			Body:        item.Body,
+			UserId:      int32(item.UserId),
+		})
+	}
+
+	return result, nil
+}
+
 func (*Delivery) CreateDir(context.Context, *storage.Dir) (*status.Status, error) {
 	panic("unimplemented")
 }
@@ -113,7 +139,7 @@ func (d *Delivery) SearchNote(
 	ctx context.Context,
 	query *wrapperspb.StringValue,
 ) (*storage.SearchResponse, error) {
-	searchItems, err := d.service.SearchNote(ctx, query.String())
+	searchItems, err := d.service.SearchNote(ctx, query.GetValue())
 	if err != nil {
 		return nil, fmt.Errorf("failed to search note: %w", err)
 	}

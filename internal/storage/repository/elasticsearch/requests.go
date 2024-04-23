@@ -32,3 +32,13 @@ func buildDeleteNotesByDirReqBody(dirId int) map[string]interface{} {
 		},
 	}
 }
+
+func buildSearchSnippetReqBody(query string) map[string]interface{} {
+	return map[string]interface{}{
+		"query": map[string]interface{}{
+			"wildcard": map[string]interface{}{
+				"name": "*" + query + "*",
+			},
+		},
+	}
+}

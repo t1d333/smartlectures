@@ -103,7 +103,7 @@ func main() {
 	// snippets
 
 	snipRep := snippetsRep.NewRepository(logger, pool)
-	snipServ := snippetsServ.NewService(logger, snipRep)
+	snipServ := snippetsServ.NewService(logger, snipRep, storageClient)
 	snipDel := snippetsDel.NewDelivery(logger, router, snipServ)
 
 	snipDel.RegisterHandler()

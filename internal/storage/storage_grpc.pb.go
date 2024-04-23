@@ -33,6 +33,7 @@ type StorageClient interface {
 	DeleteNote(ctx context.Context, in *wrapperspb.Int32Value, opts ...grpc.CallOption) (*status.Status, error)
 	SearchNote(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error)
 	SearchDir(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchResponse, error)
+	SearchSnippet(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchSnippetResponse, error)
 }
 
 type storageClient struct {
@@ -124,6 +125,15 @@ func (c *storageClient) SearchDir(ctx context.Context, in *wrapperspb.StringValu
 	return out, nil
 }
 
+func (c *storageClient) SearchSnippet(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*SearchSnippetResponse, error) {
+	out := new(SearchSnippetResponse)
+	err := c.cc.Invoke(ctx, "/Storage/SearchSnippet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StorageServer is the server API for Storage service.
 // All implementations must embed UnimplementedStorageServer
 // for forward compatibility
@@ -137,6 +147,7 @@ type StorageServer interface {
 	DeleteNote(context.Context, *wrapperspb.Int32Value) (*status.Status, error)
 	SearchNote(context.Context, *wrapperspb.StringValue) (*SearchResponse, error)
 	SearchDir(context.Context, *wrapperspb.StringValue) (*SearchResponse, error)
+	SearchSnippet(context.Context, *wrapperspb.StringValue) (*SearchSnippetResponse, error)
 	mustEmbedUnimplementedStorageServer()
 }
 
@@ -170,6 +181,9 @@ func (UnimplementedStorageServer) SearchNote(context.Context, *wrapperspb.String
 }
 func (UnimplementedStorageServer) SearchDir(context.Context, *wrapperspb.StringValue) (*SearchResponse, error) {
 	return nil, status1.Errorf(codes.Unimplemented, "method SearchDir not implemented")
+}
+func (UnimplementedStorageServer) SearchSnippet(context.Context, *wrapperspb.StringValue) (*SearchSnippetResponse, error) {
+	return nil, status1.Errorf(codes.Unimplemented, "method SearchSnippet not implemented")
 }
 func (UnimplementedStorageServer) mustEmbedUnimplementedStorageServer() {}
 
@@ -346,6 +360,24 @@ func _Storage_SearchDir_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Storage_SearchSnippet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(wrapperspb.StringValue)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServer).SearchSnippet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Storage/SearchSnippet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServer).SearchSnippet(ctx, req.(*wrapperspb.StringValue))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Storage_ServiceDesc is the grpc.ServiceDesc for Storage service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -388,6 +420,10 @@ var Storage_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SearchDir",
 			Handler:    _Storage_SearchDir_Handler,
+		},
+		{
+			MethodName: "SearchSnippet",
+			Handler:    _Storage_SearchSnippet_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

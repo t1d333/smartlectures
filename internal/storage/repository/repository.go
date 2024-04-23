@@ -13,5 +13,6 @@ type Repository interface {
 	DeleteNote(ctx context.Context, id int) error
 	DeleteDir(ctx context.Context, id int) error
 	SearchNote(ctx context.Context, query string) ([]models.NoteSearchItem, error)
+	SearchSnippet(ctx context.Context, query string) ([]models.Snippet, error)
 	SearchDir(ctx context.Context, query string) ([]int, error)
 }

@@ -15,6 +15,15 @@ type Service struct {
 	repository repository.Repository
 }
 
+func (s *Service) SearchSnippet(ctx context.Context, query string) ([]models.Snippet, error) {
+	result, err := s.repository.SearchSnippet(ctx, query)
+	if err != nil {
+		return []models.Snippet{}, fmt.Errorf("failed to search snippet in service: %w", err)
+	}
+
+	return result, nil
+}
+
 func (s *Service) DeleteDir(ctx context.Context, id int) error {
 	err := s.repository.DeleteDir(ctx, id)
 	if err != nil {
@@ -26,6 +35,7 @@ func (s *Service) DeleteDir(ctx context.Context, id int) error {
 
 func (*Service) SearchDir(ctx context.Context, query string) ([]models.Dir, error) {
 	panic("unimplemented")
+	
 }
 
 func (s *Service) SearchNote(ctx context.Context, query string) ([]models.NoteSearchItem, error) {
