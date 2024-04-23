@@ -481,13 +481,42 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetSnippetsResponse'
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Snippet'
+                required: [snippets]
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+      tags: [snippets]
+
+  /snippets/search:
+    post:
+      summary: Поиск сниппетов
+      responses:
+        '200':
+          description: Ответ при успешном поиске
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteSearchResponse'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
       tags: [snippets]
 components:
   schemas:
