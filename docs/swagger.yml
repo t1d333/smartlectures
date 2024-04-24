@@ -483,7 +483,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  items:
+                  snippets:
                     type: array
                     items:
                       $ref: '#/components/schemas/Snippet'
@@ -505,7 +505,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NoteSearchResponse'
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Snippet'
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
