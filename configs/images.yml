@@ -1,7 +1,7 @@
 ---
-region: ru-central1
-url: https://storage.yandexcloud.net
-partitionId: yc
-bucket: smartlectures
+region: ru-msk
+url: https://hb.ru-msk.vkcs.cloud
+partitionId: abc
+bucket: easytex
 port: 8000
 address: localhost

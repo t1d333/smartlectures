@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/google/uuid"
 	"github.com/t1d333/smartlectures/internal/images"
 	"github.com/t1d333/smartlectures/internal/images/repository"
@@ -15,6 +16,7 @@ import (
 )
 
 type Repository struct {
+	path   string
 	bucket string
 	url    string
 	logger logger.Logger
@@ -25,16 +27,15 @@ func (r *Repository) UploadImage(img io.Reader, ctx context.Context) (string, er
 	id := uuid.NewString()
 	_, err := r.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(r.bucket),
-		Key:    aws.String(id),
+		Key:    aws.String(r.path + id),
+		ACL:    types.ObjectCannedACLPublicRead,
 		Body:   img,
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to upload image to s3 bucket: %w", err)
 	}
 
-	// https://storage.yandexcloud.net/smartlectures/15-02-2022-scala_lect2.pdf
-
-	return fmt.Sprintf("%s/%s/%s", r.url, r.bucket, id), nil
+	return fmt.Sprintf("%s/%s/%s%s", r.url, r.bucket, r.path, id), nil
 }
 
 func NewRepository(logger logger.Logger, appCfg images.Config) (repository.Repository, error) {
@@ -42,7 +43,6 @@ func NewRepository(logger logger.Logger, appCfg images.Config) (repository.Repos
 		func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 			if service == s3.ServiceID && region == appCfg.Region {
 				return aws.Endpoint{
-					PartitionID:   appCfg.PartitionId,
 					URL:           appCfg.URL,
 					SigningRegion: appCfg.Region,
 				}, nil
@@ -65,5 +65,6 @@ func NewRepository(logger logger.Logger, appCfg images.Config) (repository.Repos
 		client: client,
 		url:    appCfg.URL,
 		bucket: appCfg.BucketName,
+		path:   "attachments/",
 	}, nil
 }
