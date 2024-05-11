@@ -15,9 +15,11 @@ services:
     container_name: backend
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./cmd/easytex/Dockerfile
     ports: [8000:8000]
-    environment: ['DB_URL=${DB_URL}', 'PORT=${PORT}}']
+    environment: ['CONFIG_PATH=/etc/easytex.yml', 'DB_URL=${DB_URL}', 'ADDRESS=${ADDRESS}}','RECOGNIZER_ADDRESS=${RECOGNIZER_ADDRESS}', 'STORAGE_ADDRESS=${STORAGE_ADDRESS}' ]
+    volumes:
+      - ./configs/easytex.yml:/etc/easytex.yml
     networks: [backend]
     depends_on: [postgres, recognizer, storage]
     restart: always
@@ -27,7 +29,7 @@ services:
       context: .
       dockerfile: ./cmd/images/Dockerfile
     ports: [8001:8000]
-    environment: ['CONFIG_PATH=${CONFIG_PATH}', 'PORT=${PORT}}']
+    environment: ['CONFIG_PATH=/etc/images.yml']
     networks: [backend]
     volumes:
       - ./configs/images.yml:/etc/images.yml
@@ -42,6 +44,18 @@ services:
     depends_on: [elasticsearch]
     environment: [ELASTICSEARCH_URL=http://elasticsearch:9200]
     restart: always
+  auth:
+    container_name: auth
+    build:
+      context: .
+      dockerfile: ./cmd/auth/Dockerfile
+    ports: [8004:8000]
+    networks: [backend]
+    depends_on: [postgres, dragonfly]
+    volumes:
+      - ./configs/auth.yml:/etc/auth.yml
+    restart: always
+    environment: ['CONFIG_PATH=/etc/auth.yml', 'DB_URL=${DB_URL}']
   recognizer:
     container_name: recognizer
     build:
@@ -56,13 +70,13 @@ services:
     environment: [SWAGGER_JSON=/docs/swagger.yml]
     volumes: [./docs:/docs]
     networks: [swagger]
-  # redis:
-  #   container_name: redis
-  #   image: redis:7.2.4
-  #   environment:
-  #     - REDIS_PASSWORD=${REDIS_PASSWORD}
-  #     - REDIS_PORT=${REDIS_PORT}
-  #   networks: [backend]
+  dragonfly:
+    container_name: dragonfly
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    ports:
+      - "6379:${DRAGONFLY_PORT}"
+    command: "--requirepass=${DRAGONFLY_PASSWORD} --port=${DRAGONFLY_PORT}"
+    networks: [backend]
   postgres:
     container_name: postgres
     image: postgres:16

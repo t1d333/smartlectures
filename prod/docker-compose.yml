@@ -17,8 +17,10 @@ services:
     container_name: backend
     build:
       context: .
-      dockerfile: Dockerfile
-    environment: ['DB_URL=${DB_URL}', 'PORT=${PORT}}']
+      dockerfile: ./cmd/easytex/Dockerfile
+    environment: ['CONFIG_PATH=/etc/easytex.yml', 'DB_URL=${DB_URL}', 'ADDRESS=${ADDRESS}}','RECOGNIZER_ADDRESS=${RECOGNIZER_ADDRESS}', 'STORAGE_ADDRESS=${STORAGE_ADDRESS}' ]
+    volumes:
+      - ./configs/easytex.yml:/etc/easytex.yml
     networks: [backend]
     depends_on: [postgres, redis, recognizer, storage]
     restart: always
@@ -43,7 +45,7 @@ services:
     build:
       context: .
       dockerfile: ./cmd/images/Dockerfile
-    environment: ['CONFIG_PATH=${CONFIG_PATH}', 'PORT=${PORT}}']
+    environment: ['CONFIG_PATH=${CONFIG_PATH}']
     networks: [backend]
     volumes:
       - ./configs/images.yml:/etc/images.yml
@@ -62,12 +64,13 @@ services:
     environment: [SWAGGER_JSON=/docs/swagger.yml]
     volumes: [./docs:/docs]
     networks: [swagger]
-  redis:
-    container_name: redis
-    image: redis:7.2.4
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - REDIS_PORT=${REDIS_PORT}
+  dragonfly:
+    container_name: dragonfly
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    ports:
+      - "6379:6379"
+    volumes:
+      - /mnt/dragonflydb:/data
     networks: [backend]
   postgres:
     container_name: postgres

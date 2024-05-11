@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/gin-contrib/cors"
+	"github.com/t1d333/smartlectures/cmd/easytex/config"
 	middl "github.com/t1d333/smartlectures/internal/middleware"
 	notesDel "github.com/t1d333/smartlectures/internal/notes/delivery/http"
 	notesRep "github.com/t1d333/smartlectures/internal/notes/repository/pg"
@@ -44,6 +45,12 @@ func main() {
 
 	router.Use(middl.NewErrorHandler(logger))
 
+	cfg, err := config.NewConfig(os.Getenv("CONFIG_PATH"))
+	
+	if err != nil {
+		logger.Fatal("failed to get config path env", err)
+	}
+
 	srv := &http.Server{
 		Addr:    ":8000",
 		Handler: router,
@@ -54,7 +61,7 @@ func main() {
 
 	logger.Infow("creating db connection...")
 
-	pool, err := pgxpool.New(ctx, os.Getenv("DB_URL"))
+	pool, err := pgxpool.New(ctx, cfg.PostgresURL)
 	if err != nil {
 		logger.Fatal("unable to create connection pool", err)
 	}
@@ -76,7 +83,7 @@ func main() {
 
 	logger.Info("creating storage client...")
 	conn, err := grpc.Dial(
-		"storage:50051",
+		cfg.StorageAddress,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -110,7 +117,7 @@ func main() {
 
 	// recognizer
 
-	recognizerServ := recServ.NewService(logger, "recognizer:50051")
+	recognizerServ := recServ.NewService(logger, cfg.RecognizerAddress)
 	recognizerDel := recDel.NewDelivery(logger, router, recognizerServ)
 
 	recognizerDel.RegisterHandler()

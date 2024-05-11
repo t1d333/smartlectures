@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY ./ ./
 
-RUN GOOS=linux go build -tags=jsoniter -o server ./cmd/main.go 
+RUN GOOS=linux go build -tags=jsoniter -o server ./cmd/easytex/main.go 
 
 FROM debian:bookworm AS build-release-stage
 
