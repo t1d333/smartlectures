@@ -70,8 +70,6 @@ services:
     environment: [SWAGGER_JSON=/docs/swagger.yml]
     volumes: [./docs:/docs]
     networks: [swagger]
-    ports:
-      - 8080:80
   dragonfly:
     container_name: dragonfly
     image: docker.dragonflydb.io/dragonflydb/dragonfly
