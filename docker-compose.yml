@@ -8,7 +8,7 @@ services:
       - ${NGINX_CONFIG_PATH}:/etc/nginx/nginx.conf
       - ./dist:/usr/share/nginx/html
     ports: ['${NGINX_HTTP_PORT}:80']
-    depends_on: [backend, images]
+    depends_on: [backend, auth, images]
     networks: [backend, swagger]
     restart: always
   backend:
@@ -21,7 +21,7 @@ services:
     volumes:
       - ./configs/easytex.yml:/etc/easytex.yml
     networks: [backend]
-    depends_on: [postgres, recognizer, storage]
+    depends_on: [postgres, recognizer, auth, storage]
     restart: always
   images:
     container_name: images
@@ -70,6 +70,8 @@ services:
     environment: [SWAGGER_JSON=/docs/swagger.yml]
     volumes: [./docs:/docs]
     networks: [swagger]
+    ports:
+      - 8080:80
   dragonfly:
     container_name: dragonfly
     image: docker.dragonflydb.io/dragonflydb/dragonfly
