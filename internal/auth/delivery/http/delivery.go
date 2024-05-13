@@ -44,6 +44,8 @@ func (d *Delivery) Login(c *gin.Context) {
 		return
 	}
 
+	// c.ClientIP()
+
 	token, err := d.service.Login(c.Request.Context(), data)
 	if err != nil {
 		_ = c.Error(err)
@@ -73,16 +75,64 @@ func (d *Delivery) Logout(c *gin.Context) {
 		_ = c.Error(err)
 		return
 	}
-	
+
 	c.SetCookie("session", "", -1, "/", "smartlectures.ru", false, true)
 	c.Status(http.StatusNoContent)
 }
 
-func (d *Delivery) Refresh(c *gin.Context) {
+func (d *Delivery) GetMe(c *gin.Context) {
+	session, err := c.Cookie("session")
+	if err != nil {
+		c.Status(http.StatusUnauthorized)
+		return
+	}
+
+	user, err := d.service.GetMe(c.Request.Context(), session)
+	
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	
+	c.JSON(http.StatusOK, user)
+
 }
 
 func (d *Delivery) Register(c *gin.Context) {
+	data := authmodels.RegisterRequest{}
+
+	if err := c.BindJSON(&data); err != nil {
+		_ = c.Error(errors.BadRequestError)
+		return
+	}
+
+	user, err := d.service.Register(c.Request.Context(), data)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	token, err := d.service.Login(c.Request.Context(), authmodels.LoginRequest{
+		Email:    data.Email,
+		Password: data.Password,
+	})
+	if err != nil {
+		_ =  c.Error(err)
+		return
+	}
+
+	c.SetCookie(
+		"session",
+		token,
+		int(service.Expire.Seconds()),
+		"/",
+		"smartlectures.ru",
+		false,
+		true,
+	)
+
+	c.JSON(http.StatusOK, user)
 }
 
-func (d *Delivery) GetMe(c *gin.Context) {
+func (d *Delivery) Refresh(c *gin.Context) {
 }

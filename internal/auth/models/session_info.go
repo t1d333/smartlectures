@@ -16,3 +16,7 @@ type SessionInfo struct {
 func (s SessionInfo) MarshalBinary() ([]byte, error) {
 	return jsoniter.Marshal(s) 
 }
+
+func (s *SessionInfo) UnmarshalBinary(data []byte) error {
+	return jsoniter.Unmarshal(data, s) 
+}

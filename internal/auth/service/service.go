@@ -32,12 +32,37 @@ func New(logger logger.Logger, repo repository.Repository) auth.Service {
 	}
 }
 
+func (s *Service) GetMe(ctx context.Context, session string) (models.User, error) {
+	tmp := strings.Split(session, "$")
+
+	if len(tmp) != 2 {
+		return models.User{}, autherrors.ErrBadToken
+	}
+
+	token := tmp[0]
+	userId, err := strconv.Atoi(tmp[1])
+	if err != nil {
+		return models.User{}, autherrors.ErrBadToken
+	}
+
+	if _, err = s.repository.GetSession(ctx, userId, token); err != nil {
+		return models.User{}, fmt.Errorf("AuthService.GetMe(session: %s): %w", session, err)
+	}
+
+	user, err := s.repository.GetUserById(ctx, userId)
+	if err != nil {
+		return models.User{}, fmt.Errorf("AuthService.GetMe(session: %s): %w", session, err)
+	}
+
+	return user, nil
+}
+
 func (s *Service) Login(ctx context.Context, data authmodels.LoginRequest) (string, error) {
 	token := uuid.NewString()
 
-	user, err := s.repository.GetUser(ctx, data.Email)
+	user, err := s.repository.GetUserByEmail(ctx, data.Email)
 	if err != nil {
-		return "", fmt.Errorf("authService.Login(data: %v): %w", data, err)
+		return "", fmt.Errorf("AuthService.Login(data: %v): %w", data, err)
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data.Password)); err != nil {
@@ -46,17 +71,40 @@ func (s *Service) Login(ctx context.Context, data authmodels.LoginRequest) (stri
 		}
 	}
 
-
 	err = s.repository.AddNewSession(ctx, authmodels.SessionInfo{
 		UserId:    user.UserId,
 		Token:     token,
 		IPAddress: "",
 		Expire:    time.Now().Add(Expire),
 	})
-	
+
 	token = fmt.Sprintf("%s$%d", token, user.UserId)
 
 	return token, err
+}
+
+
+func (s *Service) IsAuthorized(ctx context.Context, session string) error {
+	tmp := strings.Split(session, "$")
+
+	if len(tmp) != 2 {
+		return autherrors.ErrBadToken
+	}
+
+	token := tmp[0]
+	userId, err := strconv.Atoi(tmp[1])
+	if err != nil {
+		return autherrors.ErrBadToken
+	}
+
+	if _, err := s.repository.GetSession(ctx, userId, token); err != nil {
+		if errors.Is(err, autherrors.ErrSessionDoesNotExists) {
+			return autherrors.ErrUserUnauthorized
+		}
+		return fmt.Errorf("AuthService.IsAuthorized(session: %s): %w", session, err)
+	}
+
+	return nil
 }
 
 func (s *Service) Logout(ctx context.Context, session string) error {
@@ -79,9 +127,34 @@ func (*Service) Refresh(ctx context.Context) error {
 	panic("unimplemented")
 }
 
-func (*Service) Register(
+func (s *Service) Register(
 	ctx context.Context,
 	data authmodels.RegisterRequest,
 ) (models.User, error) {
-	panic("unimplemented")
+	_, err := s.repository.GetUserByEmail(ctx, data.Email)
+
+	if err != nil && !errors.Is(err, autherrors.ErrUserNotFound) {
+		return models.User{}, fmt.Errorf("AuthService.Register(data: %v): %w", data, err)
+	} else if errors.Is(err, autherrors.ErrUserNotFound) {
+
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return models.User{}, fmt.Errorf("AuthService.Register(data: %v): %w", data, err)
+		}
+
+		user, err := s.repository.RegisterNewUser(ctx, models.User{
+			Username: data.Username,
+			Email:    data.Email,
+			Surname:  data.Surname,
+			Name:     data.Name,
+			Password: hashedPassword,
+		})
+		if err != nil {
+			return models.User{}, fmt.Errorf("AuthService(data: %v): %w", data, err)
+		}
+
+		return user, nil
+	}
+
+	return models.User{}, autherrors.ErrUserAlreadyExists
 }

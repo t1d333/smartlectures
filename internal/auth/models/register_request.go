@@ -5,5 +5,5 @@ type RegisterRequest struct {
 	Surname  string `json:"surname"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
-	Password []byte `json:"password"`
+	Password string `json:"password"`
 }

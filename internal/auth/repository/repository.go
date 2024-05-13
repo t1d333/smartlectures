@@ -19,7 +19,9 @@ type Repository interface {
 	DeleteSession(ctx context.Context, userId int, session string) error
 	AddNewSession(ctx context.Context, session authmodels.SessionInfo) error
 	CheckExistingUsers(ctx context.Context, user models.User) ([]models.User, error)
-	GetUser(ctx context.Context, email string) (models.User, error)
+	GetUserByEmail(ctx context.Context, email string) (models.User, error)
+	GetUserById(ctx context.Context, id int) (models.User, error)
+	GetSession(ctx context.Context, id int, token string) (authmodels.SessionInfo, error)
 }
 
 type RepositoryImpl struct {
@@ -28,8 +30,34 @@ type RepositoryImpl struct {
 	logger        logger.Logger
 }
 
-func (r *RepositoryImpl) GetUser(ctx context.Context, email string) (models.User, error) {
-	return r.postgresRepo.GetUser(ctx, email)
+func (r *RepositoryImpl) GetSession(
+	ctx context.Context,
+	id int,
+	token string,
+) (authmodels.SessionInfo, error) {
+	info, err := r.dragonflyRepo.GetSession(ctx, id, token)
+	if err != nil {
+		return info, fmt.Errorf("AuthRepository.GetSession(id: %d, token: %s): %w", id, token, err)
+	}
+
+	return info, nil
+}
+
+func (r *RepositoryImpl) GetUserById(ctx context.Context, id int) (models.User, error) {
+	user, err := r.postgresRepo.GetUserById(ctx, id)
+	if err != nil {
+		return user, fmt.Errorf("AuthRepository.GetUserById(id: %d): %w", id, err)
+	}
+	return user, nil
+}
+
+func (r *RepositoryImpl) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
+	user, err := r.postgresRepo.GetUserByEmail(ctx, email)
+	if err != nil {
+		return user, fmt.Errorf("AuthRepository.GetUserById(email: %s): %w", email, err)
+	}
+
+	return user, nil
 }
 
 func New(logger logger.Logger, rdc *redis.Client, pgc *pgxpool.Pool) Repository {
@@ -43,7 +71,7 @@ func New(logger logger.Logger, rdc *redis.Client, pgc *pgxpool.Pool) Repository 
 func (r *RepositoryImpl) AddNewSession(ctx context.Context, session authmodels.SessionInfo) error {
 	err := r.dragonflyRepo.AddSession(ctx, session)
 	if err != nil {
-		return fmt.Errorf("authRepository.AddNewSession(session: %v): %w", session, err)
+		return fmt.Errorf("AuthRepository.AddNewSession(session: %v): %w", session, err)
 	}
 
 	return nil
@@ -60,7 +88,7 @@ func (r *RepositoryImpl) DeleteSession(ctx context.Context, userId int, session 
 	err := r.dragonflyRepo.DeleteSession(ctx, userId, session)
 	if err != nil {
 		return fmt.Errorf(
-			"authRepository.AddDeleteSession(userId: %d, token: %s): %w",
+			"AuthRepository.AddDeleteSession(userId: %d, token: %s): %w",
 			userId,
 			session,
 			err,
@@ -74,5 +102,10 @@ func (r *RepositoryImpl) RegisterNewUser(
 	ctx context.Context,
 	user models.User,
 ) (models.User, error) {
-	panic("unimplemented")
+	user, err := r.postgresRepo.RegisterUser(ctx, user)
+	if err != nil {
+		return models.User{}, fmt.Errorf("AuthRepository.RegisterNewUser(user: %v): %w", user, err)
+	}
+
+	return user, nil
 }

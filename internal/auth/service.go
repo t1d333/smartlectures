@@ -13,4 +13,5 @@ type Service interface {
 	Logout(ctx context.Context, session string) error
 	Register(ctx context.Context, data authmodels.RegisterRequest) (models.User, error)
 	Refresh(ctx context.Context) error
+	GetMe(ctx context.Context, token string) (models.User, error)
 }
