@@ -6,7 +6,6 @@ services:
     build:
       context: .
       dockerfile: ./cmd/storage/Dockerfile
-    networks: [backend]
     depends_on: [elasticsearch]
     environment: [ELASTICSEARCH_URL=http://elasticsearch:9200]
     restart: always
@@ -17,7 +16,6 @@ services:
     build:
       context: ./configs/elastic
       dockerfile: Dockerfile
-    networks: [backend]
     environment: [discovery.type=single-node, xpack.security.enabled=false]
     ports:
       - 9200:9200
