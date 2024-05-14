@@ -14,6 +14,22 @@ prod:
 	@rm ./docker-compose.yml
 	@mv ./docker-compose-dev.yml ./docker-compose.yml  
 
+build-prod-ml-search:
+	@mv ./docker-compose.yml ./docker-compose-dev.yml 
+	@cp ./prod/docker-compose.second.yml ./docker-compose.yml
+	@docker compose up --build -d
+	@rm ./docker-compose.yml
+	@mv ./docker-compose-dev.yml ./docker-compose.yml  
+	
+prod-ml-search:
+	@mv ./docker-compose.yml ./docker-compose-dev.yml 
+	@cp ./prod/docker-compose.second.yml ./docker-compose.yml
+	@docker compose up -d
+	@rm ./docker-compose.yml
+	@mv ./docker-compose-dev.yml ./docker-compose.yml  
+
+
+
 swagger:
 	@docker compose up swagger -d
 	@docker compose up nginx -d

@@ -51,6 +51,11 @@ services:
       dockerfile: Dockerfile
     networks: [backend]
     environment: [discovery.type=single-node, xpack.security.enabled=false]
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - /mnt/elasticsearch:/usr/share/elasticsearch/data
   images:
     container_name: images
     build:

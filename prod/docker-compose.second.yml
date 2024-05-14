@@ -1,0 +1,33 @@
+---
+version: '3.8'
+services:
+  storage:
+    container_name: storage
+    build:
+      context: .
+      dockerfile: ./cmd/storage/Dockerfile
+    networks: [backend]
+    depends_on: [elasticsearch]
+    environment: [ELASTICSEARCH_URL=http://elasticsearch:9200]
+    restart: always
+    ports:
+      - 50052:50051
+  elasticsearch:
+    container_name: elastic
+    build:
+      context: ./configs/elastic
+      dockerfile: Dockerfile
+    networks: [backend]
+    environment: [discovery.type=single-node, xpack.security.enabled=false]
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - /mnt/elasticsearch:/usr/share/elasticsearch/data
+  recognizer:
+    container_name: recognizer
+    build:
+      context: ./recognizer
+      dockerfile: Dockerfile
+    ports: [50051:50051]
+    environment: [CNSTD_DOWNLOAD_SOURCE="HF", CNOCR_DOWNLOAD_SOURCE="HF"]

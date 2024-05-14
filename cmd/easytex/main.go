@@ -86,6 +86,7 @@ func main() {
 		cfg.StorageAddress,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
+	
 	if err != nil {
 		logger.Fatalf("failed to create storage client %s", err)
 	}
