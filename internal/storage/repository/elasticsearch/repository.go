@@ -123,6 +123,9 @@ func (r *Repository) SearchNote(
 		r.client.Search.WithIndex("notes"),
 		r.client.Search.WithBody(strings.NewReader(buf.String())),
 		r.client.Search.WithSource("noteId", "name"),
+		r.client.Search.WithTrackTotalHits(true),
+		r.client.Search.WithPretty(),
+	
 	)
 	if err != nil {
 		return []models.NoteSearchItem{}, fmt.Errorf("failed to make search request: %w", err)
