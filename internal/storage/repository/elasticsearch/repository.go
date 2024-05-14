@@ -119,6 +119,8 @@ func (r *Repository) SearchNote(
 	}
 
 	res, err := r.client.Search(
+		r.client.Search.WithContext(ctx),
+		r.client.Search.WithIndex("notes"),
 		r.client.Search.WithBody(strings.NewReader(buf.String())),
 		r.client.Search.WithSource("noteId", "name"),
 	)
