@@ -43,6 +43,11 @@ storage:
     --go-grpc_out=./internal/ --go-grpc_opt=paths=source_relative \
     -Iprotos protos/storage/storage.proto
 	
+auth:
+	@protoc --go_out=./internal/ --go_opt=paths=source_relative \
+    --go-grpc_out=./internal/ --go-grpc_opt=paths=source_relative \
+    -Iprotos protos/auth/auth.proto
+	
 recognizer:
 	@cp ./configs/recognizer/Dockerfile ./recognizer/Dockerfile
 	
@@ -55,3 +60,4 @@ recognizer-client:
 	@protoc --go_out=./internal/recognizer/service --go_opt=paths=source_relative \
     --go-grpc_out=./internal/recognizer/service --go-grpc_opt=paths=source_relative \
     -Iprotos protos/recognizer.proto
+

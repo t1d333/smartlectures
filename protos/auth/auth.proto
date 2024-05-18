@@ -1,0 +1,21 @@
+syntax = 'proto3';
+option go_package = "./auth";
+
+package auth;
+
+
+import "google/protobuf/wrappers.proto";
+
+enum AuthStatus {
+  Authorized = 0;
+  Unauthorized= 1;
+}
+
+message AuthCheckResult {
+  int32 user_id = 1;
+  AuthStatus status = 2;
+}
+
+service AuthService {
+  rpc CheckAuth(google.protobuf.StringValue) returns (AuthCheckResult) {}
+}

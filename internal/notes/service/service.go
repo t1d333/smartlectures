@@ -97,6 +97,7 @@ func (s *Service) DeleteNote(noteId int, ctx context.Context) error {
 }
 
 func (s *Service) GetNote(noteId int, ctx context.Context) (models.Note, error) {
+	fmt.Println("service user_id : ", ctx.Value("userId"))
 	note, err := s.repository.GetNote(noteId, ctx)
 	if err != nil {
 		return note, fmt.Errorf("failed to get note in notes service: %w", err)

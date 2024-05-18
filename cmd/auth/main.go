@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,44 +13,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
 
 	"github.com/t1d333/smartlectures/cmd/auth/config"
+	"github.com/t1d333/smartlectures/internal/auth"
+	grpcDel "github.com/t1d333/smartlectures/internal/auth/delivery/grpc"
 	delivery "github.com/t1d333/smartlectures/internal/auth/delivery/http"
 	"github.com/t1d333/smartlectures/internal/auth/repository"
 	"github.com/t1d333/smartlectures/internal/auth/service"
 	middl "github.com/t1d333/smartlectures/internal/middleware"
 	"github.com/t1d333/smartlectures/pkg/logger"
 )
-
-func ExampleClient() {
-	ctx := context.Background()
-
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "dragonfly:6379",
-		Password: "password",
-		DB:       0,
-	})
-
-	err := rdb.Set(ctx, "key", "value", 0).Err()
-	if err != nil {
-		panic(err)
-	}
-
-	val, err := rdb.Get(ctx, "key").Result()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("key", val)
-
-	val2, err := rdb.Get(ctx, "key2").Result()
-	if err == redis.Nil {
-		fmt.Println("key2 does not exist")
-	} else if err != nil {
-		panic(err)
-	} else {
-		fmt.Println("key2", val2)
-	}
-}
 
 func main() {
 	logger := logger.NewLogger()
@@ -97,6 +70,24 @@ func main() {
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	go func() {
+		lis, err := net.Listen("tcp", ":50051")
+		if err != nil {
+			logger.Fatalf("failed to listen: %v", err)
+		}
+
+		var opts []grpc.ServerOption
+
+		del := grpcDel.NewDelivery(logger, svc)
+		logger.Info("starting grpc server on port 50051...")
+		grpcServer := grpc.NewServer(opts...)
+		auth.RegisterAuthServiceServer(grpcServer, del)
+
+		if err = grpcServer.Serve(lis); err != nil {
+			logger.Fatal("failed to start grpc server", err)
 		}
 	}()
 

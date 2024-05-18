@@ -21,7 +21,7 @@ services:
     volumes:
       - ./configs/easytex.yml:/etc/easytex.yml
     networks: [backend]
-    depends_on: [postgres, recognizer, auth, storage]
+    depends_on: [postgres, auth]
     restart: always
   images:
     container_name: images

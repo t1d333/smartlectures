@@ -40,6 +40,7 @@ func (d *Delivery) RegisterHandler() {
 
 func (d *Delivery) GetNote(c *gin.Context) {
 	noteIdStr := c.Param("noteId")
+	fmt.Println("delivery: user_id", c.Keys["userId"], c.GetInt("userId"))
 
 	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
 		_ = c.Error(errors.BadRequestError)

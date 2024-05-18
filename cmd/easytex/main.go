@@ -33,6 +33,9 @@ import (
 	recDel "github.com/t1d333/smartlectures/internal/recognizer/delivery/http"
 	recServ "github.com/t1d333/smartlectures/internal/recognizer/service"
 
+	auth "github.com/t1d333/smartlectures/internal/auth"
+	authmiddleware "github.com/t1d333/smartlectures/internal/auth/middleware"
+
 	"github.com/t1d333/smartlectures/pkg/logger"
 )
 
@@ -43,10 +46,7 @@ func main() {
 
 	router.Use(cors.Default())
 
-	router.Use(middl.NewErrorHandler(logger))
-
 	cfg, err := config.NewConfig(os.Getenv("CONFIG_PATH"))
-	
 	if err != nil {
 		logger.Fatal("failed to get config path env", err)
 	}
@@ -79,18 +79,32 @@ func main() {
 
 	logger.Infow("db connection successfully")
 
-	// notes
+	// auth middleware
 
-	logger.Info("creating storage client...")
 	conn, err := grpc.Dial(
-		cfg.StorageAddress,
+		"auth:50051",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
-	
 	if err != nil {
 		logger.Fatalf("failed to create storage client %s", err)
 	}
 	defer conn.Close()
+
+	router.Use(middl.NewErrorHandler(logger))
+	router.Use(authmiddleware.NewAuthHandler(auth.NewAuthServiceClient(conn), logger))
+
+	// notes
+
+	logger.Info("creating storage client...")
+	conn, err = grpc.Dial(
+		cfg.StorageAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		logger.Fatalf("failed to create storage client %s", err)
+	}
+	defer conn.Close()
+
 	logger.Info("storage client cratead successfully")
 
 	storageClient := storage.NewStorageClient(conn)
