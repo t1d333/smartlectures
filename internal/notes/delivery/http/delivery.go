@@ -85,13 +85,15 @@ func (d *Delivery) Search(c *gin.Context) {
 
 func (d *Delivery) CreateNote(c *gin.Context) {
 	note := models.Note{}
-	userId := c.Keys["userId"]
+	userId := c.Keys["userId"].(int)
 
 	if err := c.BindJSON(&note); err != nil {
 		d.logger.Errorf("failed to decode note: %w", err)
 		_ = c.Error(errors.BadRequestError)
 		return
 	}
+
+	note.UserId = userId
 
 	noteId, err := d.service.CreateNote(
 		context.WithValue(c.Request.Context(), "userId", userId),

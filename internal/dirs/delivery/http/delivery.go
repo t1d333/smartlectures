@@ -63,6 +63,8 @@ func (d *Delivery) CreateDir(c *gin.Context) {
 		return
 	}
 
+	dir.UserId = userId
+
 	dirId, err := d.service.CreateDir(context.WithValue(c.Request.Context(), "userId", userId), dir)
 	if err != nil {
 		_ = c.Error(err)
@@ -89,7 +91,7 @@ func (d *Delivery) DeleteDir(c *gin.Context) {
 
 func (d *Delivery) GetDirsOverview(c *gin.Context) {
 	userId := c.Keys["userId"].(int)
-	
+
 	overview, err := d.service.GetDirsOverview(c.Request.Context(), userId)
 	if err != nil {
 		_ = c.Error(err)
@@ -101,7 +103,7 @@ func (d *Delivery) GetDirsOverview(c *gin.Context) {
 
 func (d *Delivery) UpdateDir(c *gin.Context) {
 	userId := c.Keys["userId"].(int)
-	
+
 	dir := models.Dir{}
 	dirIdStr := c.Param("dirId")
 	dirId := 0
