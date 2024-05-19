@@ -111,7 +111,7 @@ func (d *Delivery) Register(c *gin.Context) {
 		return
 	}
 
-	token, err := d.service.Login(c.Request.Context(), authmodels.LoginRequest{
+	token, err := d.service.Login(context.WithValue(c.Request.Context(), "client_ip", c.ClientIP()), authmodels.LoginRequest{
 		Email:    data.Email,
 		Password: data.Password,
 	})

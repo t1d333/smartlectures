@@ -9,9 +9,13 @@ servers:
     description: Main server
   - url: http://localhost:8080/api/v1
     description: Localhost server
+
+
 paths:
   /notes:
     post:
+      security:
+        - cookieAuth: ["session"]
       summary: Создание заметки
       description: Создание заметки
       responses:
@@ -47,6 +51,8 @@ paths:
       tags: [notes]
   /notes/overview:
     get:
+      security:
+        - cookieAuth: ["session"]
       summary: Получение заметок для отображения структуры
       description: Получение информации о заметка для отображения превью
       responses:
@@ -83,6 +89,8 @@ paths:
       tags: [notes]
   /notes/{noteId}:
     get:
+      security:
+        - cookieAuth: ["session"]
       parameters:
         - in: path
           name: noteId
@@ -132,6 +140,8 @@ paths:
                 $ref: '#/components/schemas/Error'
       tags: [notes]
     put:
+      security:
+        - cookieAuth: []
       parameters:
         - in: path
           name: noteId
@@ -181,6 +191,8 @@ paths:
               $ref: '#/components/schemas/Note'
       tags: [notes]
     delete:
+      security:
+        - cookieAuth: []
       parameters:
         - in: path
           name: noteId
@@ -220,6 +232,8 @@ paths:
       tags: [notes]
   /notes/{noteId}/download/md:
     get:
+      security:
+        - cookieAuth: []
       parameters:
         - in: path
           name: noteId
@@ -270,6 +284,8 @@ paths:
         
   /notes/{noteId}/download/pdf:
     get:
+      security:
+        - cookieAuth: []
       parameters:
         - in: path
           name: noteId
@@ -319,6 +335,8 @@ paths:
       tags: [notes]
   /notes/search:
     post:
+      security:
+        - cookieAuth: []
       summary: Поиск заметок
       responses:
         '200':
@@ -353,6 +371,8 @@ paths:
       tags: [notes]
   /dirs:
     post:
+      security:
+        - cookieAuth: []
       summary: Создание папки
       requestBody:
         content:
@@ -745,6 +765,11 @@ paths:
       responses:
         '204':
           description: Ответ при успешном поиске
+          headers: 
+            Set-Cookie:
+              schema: 
+                type: string
+                example: session=abcde12345; Path=/; HttpOnly
         '400':
           description: Ответ, при неверной почте или пароле
           content:
@@ -833,6 +858,12 @@ paths:
                 $ref: '#/components/schemas/Error'
       tags: [auth]
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+ 
   schemas:
     GetSnippetsResponse:
       type: object

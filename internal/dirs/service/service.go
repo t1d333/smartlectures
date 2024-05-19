@@ -6,6 +6,7 @@ import (
 
 	"github.com/t1d333/smartlectures/internal/dirs"
 	"github.com/t1d333/smartlectures/internal/dirs/repository"
+	"github.com/t1d333/smartlectures/internal/errors"
 	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/pkg/logger"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -23,7 +24,7 @@ type Service struct {
 	client     storage.StorageClient
 }
 
-func (s *Service) CreateDir(dir models.Dir, ctx context.Context) (int, error) {
+func (s *Service) CreateDir(ctx context.Context, dir models.Dir) (int, error) {
 	if dir.Name == "" {
 		dir.Name = newDirName
 	}
@@ -36,8 +37,17 @@ func (s *Service) CreateDir(dir models.Dir, ctx context.Context) (int, error) {
 	return dirId, err
 }
 
-func (s *Service) DeleteDir(dirId int, ctx context.Context) error {
-	err := s.repository.DeleteDir(dirId, ctx)
+func (s *Service) DeleteDir(ctx context.Context, dirId int) error {
+	dir, err := s.GetDir(ctx, dirId)
+
+	if err != nil {
+		return fmt.Errorf("DirsService.UpdateDir(dir: %v): %w", dir, err)
+	} else if dir.UserId != ctx.Value("userId") {
+		return errors.ErrPermissionDenied
+	}
+
+	
+	err = s.repository.DeleteDir(dirId, ctx)
 	if err != nil {
 		return fmt.Errorf("failed to delete dir in dirs service: %w", err)
 	}
@@ -46,13 +56,17 @@ func (s *Service) DeleteDir(dirId int, ctx context.Context) error {
 
 	if status.Code != 204 {
 		return fmt.Errorf("failed to delete dir from index: %s", status.Message)
-	} 
+	}
 
 	return nil
 }
 
-func (s *Service) GetDir(dirId int, ctx context.Context) (models.Dir, error) {
+func (s *Service) GetDir(ctx context.Context, dirId int) (models.Dir, error) {
 	dir, err := s.repository.GetDir(dirId, ctx)
+	if dir.UserId != ctx.Value("userId") {
+		return models.Dir{}, errors.ErrPermissionDenied
+	}
+
 	if err != nil {
 		err = fmt.Errorf("failed to get dir in dirs service: %w", err)
 	}
@@ -60,7 +74,7 @@ func (s *Service) GetDir(dirId int, ctx context.Context) (models.Dir, error) {
 	return dir, err
 }
 
-func (s *Service) GetDirsOverview(userId int, ctx context.Context) (models.DirsOverview, error) {
+func (s *Service) GetDirsOverview(ctx context.Context, userId int) (models.DirsOverview, error) {
 	overview, err := s.repository.GetDirsOverview(userId, ctx)
 	if err != nil {
 		err = fmt.Errorf("failed to get dirs overview in dirs service: %w", err)
@@ -69,8 +83,16 @@ func (s *Service) GetDirsOverview(userId int, ctx context.Context) (models.DirsO
 	return overview, err
 }
 
-func (s *Service) UpdateDir(dir models.Dir, ctx context.Context) error {
-	err := s.repository.UpdateDir(dir, ctx)
+func (s *Service) UpdateDir(ctx context.Context, dir models.Dir) error {
+	dir, err := s.GetDir(ctx, dir.DirId)
+
+	if err != nil {
+		return fmt.Errorf("DirsService.UpdateDir(dir: %v): %w", dir, err)
+	} else if dir.UserId != ctx.Value("userId") {
+		return errors.ErrPermissionDenied
+	}
+
+	err = s.repository.UpdateDir(dir, ctx)
 	if err != nil {
 		err = fmt.Errorf("failed to update dir in dirs service: %w", err)
 	}

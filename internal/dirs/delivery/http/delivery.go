@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -35,12 +36,13 @@ func (d *Delivery) RegisterHandler() {
 
 func (d *Delivery) GetDir(c *gin.Context) {
 	dirIdStr := c.Param("dirId")
+	userId := c.Keys["userId"].(int)
 
 	if dirId, err := strconv.Atoi(dirIdStr); err != nil {
 		_ = c.Error(errors.BadRequestError)
 		return
 	} else {
-		dir, err := d.service.GetDir(dirId, c.Request.Context())
+		dir, err := d.service.GetDir(context.WithValue(c.Request.Context(), "userId", userId), dirId)
 		if err != nil {
 			_ = c.Error(err)
 			return
@@ -53,6 +55,7 @@ func (d *Delivery) GetDir(c *gin.Context) {
 
 func (d *Delivery) CreateDir(c *gin.Context) {
 	dir := models.Dir{}
+	userId := c.Keys["userId"].(int)
 
 	if err := c.BindJSON(&dir); err != nil {
 		d.logger.Errorf("failed to decode dir: %w", err)
@@ -60,7 +63,7 @@ func (d *Delivery) CreateDir(c *gin.Context) {
 		return
 	}
 
-	dirId, err := d.service.CreateDir(dir, c.Request.Context())
+	dirId, err := d.service.CreateDir(context.WithValue(c.Request.Context(), "userId", userId), dir)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -71,11 +74,12 @@ func (d *Delivery) CreateDir(c *gin.Context) {
 
 func (d *Delivery) DeleteDir(c *gin.Context) {
 	dirIdStr := c.Param("dirId")
+	userId := c.Keys["userId"].(int)
 
 	if dirId, err := strconv.Atoi(dirIdStr); err != nil {
 		_ = c.Error(errors.BadRequestError)
 		return
-	} else if err := d.service.DeleteDir(dirId, c.Request.Context()); err != nil {
+	} else if err := d.service.DeleteDir(context.WithValue(c.Request.Context(), "userId", userId), dirId); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -84,9 +88,9 @@ func (d *Delivery) DeleteDir(c *gin.Context) {
 }
 
 func (d *Delivery) GetDirsOverview(c *gin.Context) {
-	userId := 1
-
-	overview, err := d.service.GetDirsOverview(userId, c.Request.Context())
+	userId := c.Keys["userId"].(int)
+	
+	overview, err := d.service.GetDirsOverview(c.Request.Context(), userId)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -96,6 +100,8 @@ func (d *Delivery) GetDirsOverview(c *gin.Context) {
 }
 
 func (d *Delivery) UpdateDir(c *gin.Context) {
+	userId := c.Keys["userId"].(int)
+	
 	dir := models.Dir{}
 	dirIdStr := c.Param("dirId")
 	dirId := 0
@@ -114,7 +120,7 @@ func (d *Delivery) UpdateDir(c *gin.Context) {
 
 	dir.DirId = dirId
 
-	if err := d.service.UpdateDir(dir, c.Request.Context()); err != nil {
+	if err := d.service.UpdateDir(context.WithValue(c.Request.Context(), "userId", userId), dir); err != nil {
 		_ = c.Error(err)
 		return
 	}
