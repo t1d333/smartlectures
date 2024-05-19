@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/t1d333/smartlectures/internal/errors"
 	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/internal/notes"
 	"github.com/t1d333/smartlectures/internal/notes/repository"
@@ -23,13 +24,19 @@ type Service struct {
 }
 
 func (s *Service) SearchNote(
-	query models.SearchRequest,
 	ctx context.Context,
+	query models.SearchRequest,
 ) ([]models.NoteSearchItem, error) {
-	searchResult, err := s.client.SearchNote(ctx, &wrapperspb.StringValue{Value: query.Query})
+	userId := ctx.Value("userId").(int)
+
+	searchResult, err := s.client.SearchNote(ctx, &storage.SearchRequest{
+		Query:  query.Query,
+		UserId: int32(userId),
+	})
 	if err != nil {
 		return []models.NoteSearchItem{}, fmt.Errorf(
-			"failed to get search result from storage service: %w",
+			"NotesService.SearchNote(query: %v): %w",
+			query,
 			err,
 		)
 	}
@@ -48,12 +55,12 @@ func (s *Service) SearchNote(
 	return result, nil
 }
 
-func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error) {
+func (s *Service) CreateNote(ctx context.Context, note models.Note) (int, error) {
 	if note.Name == "" {
 		note.Name = newNoteName
 	}
 
-	noteId, err := s.repository.CreateNote(note, ctx)
+	noteId, err := s.repository.CreateNote(ctx, note)
 	if err != nil {
 		return noteId, fmt.Errorf("failed to create note in notes service: %w", err)
 	}
@@ -62,6 +69,7 @@ func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error)
 
 	status, err := s.client.CreateNote(ctx, &storage.Note{
 		Id:        int32(noteId),
+		UserId:    int32(note.UserId),
 		Name:      note.Name,
 		Body:      note.Body,
 		ParentDir: int32(note.ParentDir),
@@ -74,8 +82,16 @@ func (s *Service) CreateNote(note models.Note, ctx context.Context) (int, error)
 	return noteId, err
 }
 
-func (s *Service) DeleteNote(noteId int, ctx context.Context) error {
-	err := s.repository.DeleteNote(noteId, ctx)
+func (s *Service) DeleteNote(ctx context.Context, noteId int) error {
+	userId := ctx.Value("userId")
+
+	if note, err := s.repository.GetNote(ctx, noteId); err != nil {
+		return fmt.Errorf("NotesService.UpdateNote(note: %v)", note)
+	} else if note.UserId != userId {
+		return errors.ErrPermissionDenied
+	}
+
+	err := s.repository.DeleteNote(ctx, noteId)
 	if err != nil {
 		return fmt.Errorf("failed to delete note in notes service: %w", err)
 	}
@@ -96,18 +112,23 @@ func (s *Service) DeleteNote(noteId int, ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) GetNote(noteId int, ctx context.Context) (models.Note, error) {
-	fmt.Println("service user_id : ", ctx.Value("userId"))
-	note, err := s.repository.GetNote(noteId, ctx)
+func (s *Service) GetNote(ctx context.Context, noteId int) (models.Note, error) {
+	note, err := s.repository.GetNote(ctx, noteId)
+	userId := ctx.Value("userId").(int)
+
 	if err != nil {
-		return note, fmt.Errorf("failed to get note in notes service: %w", err)
+		return models.Note{}, fmt.Errorf("failed to get note in notes service: %w", err)
 	}
 
+	if note.UserId != userId {
+		fmt.Println(note.UserId, userId)
+		return models.Note{}, errors.ErrPermissionDenied
+	}
 	return note, err
 }
 
-func (s *Service) GetNotesOverview(userId int, ctx context.Context) (models.NotesOverview, error) {
-	notes, err := s.repository.GetNotesOverview(userId, ctx)
+func (s *Service) GetNotesOverview(ctx context.Context, userId int) (models.NotesOverview, error) {
+	notes, err := s.repository.GetNotesOverview(ctx, userId)
 	if err != nil {
 		return models.NotesOverview{}, fmt.Errorf(
 			"failed to get notes overview in notes service: %w",
@@ -118,8 +139,16 @@ func (s *Service) GetNotesOverview(userId int, ctx context.Context) (models.Note
 	return models.NotesOverview{Notes: notes}, nil
 }
 
-func (s *Service) UpdateNote(note models.Note, ctx context.Context) error {
-	if err := s.repository.UpdateNote(note, ctx); err != nil {
+func (s *Service) UpdateNote(ctx context.Context, note models.Note) error {
+	userId := ctx.Value("userId")
+
+	if note, err := s.repository.GetNote(ctx, note.NoteId); err != nil {
+		return fmt.Errorf("NotesService.UpdateNote(note: %v)", note)
+	} else if note.UserId != userId {
+		return errors.ErrPermissionDenied
+	}
+
+	if err := s.repository.UpdateNote(ctx, note); err != nil {
 		return fmt.Errorf("failed to update note in notes service: %w", err)
 	}
 

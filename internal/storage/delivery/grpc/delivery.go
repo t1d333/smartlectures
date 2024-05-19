@@ -6,6 +6,7 @@ import (
 
 	"github.com/t1d333/smartlectures/internal/errors"
 	"github.com/t1d333/smartlectures/internal/models"
+	service "github.com/t1d333/smartlectures/internal/storage"
 	storage "github.com/t1d333/smartlectures/internal/storage"
 	"github.com/t1d333/smartlectures/pkg/logger"
 	"google.golang.org/genproto/googleapis/rpc/status"
@@ -84,6 +85,7 @@ func (d *Delivery) CreateNote(ctx context.Context, note *storage.Note) (*status.
 	err := d.service.CreateNote(
 		ctx,
 		models.Note{
+			UserId:    int(note.GetUserId()),
 			NoteId:    int(note.GetId()),
 			Body:      note.GetBody(),
 			Name:      note.GetName(),
@@ -137,9 +139,12 @@ func (d *Delivery) DeleteNote(
 
 func (d *Delivery) SearchNote(
 	ctx context.Context,
-	query *wrapperspb.StringValue,
+	req *service.SearchRequest,
 ) (*storage.SearchResponse, error) {
-	searchItems, err := d.service.SearchNote(ctx, query.GetValue())
+	searchItems, err := d.service.SearchNote(
+		context.WithValue(ctx, "userId", int(req.UserId)),
+		req.GetQuery(),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search note: %w", err)
 	}

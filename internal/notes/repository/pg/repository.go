@@ -19,7 +19,7 @@ type Repository struct {
 	pool   *pgxpool.Pool
 }
 
-func (r *Repository) CreateNote(note models.Note, ctx context.Context) (int, error) {
+func (r *Repository) CreateNote(ctx context.Context, note models.Note) (int, error) {
 	var row pgx.Row
 
 	if note.ParentDir == 0 {
@@ -56,7 +56,7 @@ func (r *Repository) CreateNote(note models.Note, ctx context.Context) (int, err
 	return noteId, nil
 }
 
-func (r *Repository) DeleteNote(noteId int, ctx context.Context) error {
+func (r *Repository) DeleteNote(ctx context.Context, noteId int) error {
 	rows, _ := r.pool.Query(
 		ctx,
 		DeleteNodeCMD,
@@ -79,7 +79,7 @@ func (r *Repository) DeleteNote(noteId int, ctx context.Context) error {
 	return nil
 }
 
-func (r *Repository) GetNote(noteId int, ctx context.Context) (models.Note, error) {
+func (r *Repository) GetNote(ctx context.Context, noteId int) (models.Note, error) {
 	note := models.Note{}
 
 	row := r.pool.QueryRow(ctx, SelectNoteByIDCMD, noteId)
@@ -106,8 +106,8 @@ func (r *Repository) GetNote(noteId int, ctx context.Context) (models.Note, erro
 }
 
 func (r *Repository) GetNotesOverview(
-	userId int,
 	ctx context.Context,
+	userId int,
 ) ([]models.NotePreview, error) {
 	overview := make([]models.NotePreview, 0)
 
@@ -140,7 +140,7 @@ func (r *Repository) GetNotesOverview(
 	return overview, nil
 }
 
-func (r *Repository) UpdateNote(note models.Note, ctx context.Context) error {
+func (r *Repository) UpdateNote(ctx context.Context, note models.Note) error {
 	rows := r.pool.QueryRow(
 		ctx,
 		UpdateNoteCMD,

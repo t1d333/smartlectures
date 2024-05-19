@@ -9,6 +9,7 @@ message Note {
   string name = 2;
   string body = 3;
   int32 parentDir = 4;
+  int32 userId = 5;
 }
 
 message Dir {
@@ -38,7 +39,15 @@ message Snippet {
   string description = 3;
   string body = 4;
   int32 userId = 5;
-} 
+}
+
+
+message SearchRequest {
+  int32 userId = 1;
+  string query = 2;
+}
+
+
 
 
 message SearchSnippetResponse {repeated Snippet items = 1;}
@@ -51,7 +60,7 @@ service Storage {
   rpc CreateDir(Dir) returns (google.rpc.Status) {}
   rpc DeleteDir(google.protobuf.Int32Value) returns (google.rpc.Status) {}
   rpc DeleteNote(google.protobuf.Int32Value) returns (google.rpc.Status) {}
-  rpc SearchNote(google.protobuf.StringValue) returns (SearchResponse) {}
+  rpc SearchNote(SearchRequest) returns (SearchResponse) {}
   rpc SearchDir(google.protobuf.StringValue) returns (SearchResponse) {}
   rpc SearchSnippet(google.protobuf.StringValue) returns (SearchSnippetResponse) {}
 }

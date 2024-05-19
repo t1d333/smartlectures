@@ -39,7 +39,9 @@ func (*Service) SearchDir(ctx context.Context, query string) ([]models.Dir, erro
 }
 
 func (s *Service) SearchNote(ctx context.Context, query string) ([]models.NoteSearchItem, error) {
-	result, err := s.repository.SearchNote(ctx, query)
+	userId := ctx.Value("userId")
+	
+	result, err := s.repository.SearchNote(ctx, query, userId.(int))
 	if err != nil {
 		return []models.NoteSearchItem{}, fmt.Errorf("failed to search note in service: %w", err)
 	}

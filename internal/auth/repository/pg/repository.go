@@ -59,11 +59,11 @@ func (r *PostgresRepository) GetUserByEmail(ctx context.Context, email string) (
 func (r *PostgresRepository) GetUserById(ctx context.Context, id int) (models.User, error) {
 	user := models.User{}
 
-	cmd := `SELECT user_id, username, name, surname, password FROM users WHERE user_id = $1`
+	cmd := `SELECT user_id, username, name, surname, password, email FROM users WHERE user_id = $1`
 
 	row := r.pool.QueryRow(ctx, cmd, id)
 
-	if err := row.Scan(&user.UserId, &user.Username, &user.Name, &user.Surname, &user.Password); err != nil &&
+	if err := row.Scan(&user.UserId, &user.Username, &user.Name, &user.Surname, &user.Password, &user.Email); err != nil &&
 		!errors.Is(err, pgx.ErrNoRows) {
 		r.logger.Errorf("PostgresRepository.GetUserById(id: %d): %w", id, err)
 		return user, fmt.Errorf("PostgresRepository.GetUserById(id: %d): %w", id, err)

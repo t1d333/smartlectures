@@ -26,4 +26,10 @@ var (
 		msg:         "dir not found",
 		responseMsg: "dir with this id not found",
 	}
+
+	ErrPermissionDenied = &Error {
+		code: http.StatusForbidden,
+		msg: "access to this resource is denied",
+		responseMsg: "no access to this resource",
+	}
 )

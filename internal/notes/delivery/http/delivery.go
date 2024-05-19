@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -40,13 +41,13 @@ func (d *Delivery) RegisterHandler() {
 
 func (d *Delivery) GetNote(c *gin.Context) {
 	noteIdStr := c.Param("noteId")
-	fmt.Println("delivery: user_id", c.Keys["userId"], c.GetInt("userId"))
+	userId := c.Keys["userId"]
 
 	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
 		_ = c.Error(errors.BadRequestError)
 		return
 	} else {
-		note, err := d.service.GetNote(noteId, c.Request.Context())
+		note, err := d.service.GetNote(context.WithValue(c.Request.Context(), "userId", userId), noteId)
 		if err != nil {
 			_ = c.Error(err)
 			return
@@ -59,13 +60,18 @@ func (d *Delivery) GetNote(c *gin.Context) {
 
 func (d *Delivery) Search(c *gin.Context) {
 	req := models.SearchRequest{}
+	userId := c.Keys["userId"]
+
 	if err := c.BindJSON(&req); err != nil {
 		d.logger.Errorf("failed to decode search request: %w", err)
 		_ = c.Error(errors.BadRequestError)
 		return
 	}
 
-	result, err := d.service.SearchNote(req, c.Request.Context())
+	result, err := d.service.SearchNote(
+		context.WithValue(c.Request.Context(), "userId", userId),
+		req,
+	)
 	if err != nil {
 		d.logger.Errorf("failed to search note %s", err)
 		_ = c.Error(err)
@@ -79,6 +85,7 @@ func (d *Delivery) Search(c *gin.Context) {
 
 func (d *Delivery) CreateNote(c *gin.Context) {
 	note := models.Note{}
+	userId := c.Keys["userId"]
 
 	if err := c.BindJSON(&note); err != nil {
 		d.logger.Errorf("failed to decode note: %w", err)
@@ -86,7 +93,10 @@ func (d *Delivery) CreateNote(c *gin.Context) {
 		return
 	}
 
-	noteId, err := d.service.CreateNote(note, c.Request.Context())
+	noteId, err := d.service.CreateNote(
+		context.WithValue(c.Request.Context(), "userId", userId),
+		note,
+	)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -97,11 +107,12 @@ func (d *Delivery) CreateNote(c *gin.Context) {
 
 func (d *Delivery) DeleteNote(c *gin.Context) {
 	noteIdStr := c.Param("noteId")
+	userId := c.Keys["userId"]
 
 	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
 		_ = c.Error(errors.BadRequestError)
 		return
-	} else if err := d.service.DeleteNote(noteId, c.Request.Context()); err != nil {
+	} else if err := d.service.DeleteNote(context.WithValue(c.Request.Context(), "userId", userId), noteId); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -110,10 +121,9 @@ func (d *Delivery) DeleteNote(c *gin.Context) {
 }
 
 func (d *Delivery) GetNotesOverview(c *gin.Context) {
-	// mock
-	userId := 1
+	userId := c.Keys["userId"]
 
-	overview, err := d.service.GetNotesOverview(userId, c.Request.Context())
+	overview, err := d.service.GetNotesOverview(c.Request.Context(), userId.(int))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -125,6 +135,7 @@ func (d *Delivery) GetNotesOverview(c *gin.Context) {
 func (d *Delivery) UpdateNote(c *gin.Context) {
 	note := models.Note{}
 	noteIdStr := c.Param("noteId")
+	userId := c.Keys["userId"]
 
 	noteId := 0
 	var err error
@@ -142,7 +153,7 @@ func (d *Delivery) UpdateNote(c *gin.Context) {
 
 	note.NoteId = noteId
 
-	if err := d.service.UpdateNote(note, c.Request.Context()); err != nil {
+	if err := d.service.UpdateNote(context.WithValue(c.Request.Context(), "userId", userId), note); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -152,12 +163,13 @@ func (d *Delivery) UpdateNote(c *gin.Context) {
 
 func (d *Delivery) ExportMd(c *gin.Context) {
 	noteIdStr := c.Param("noteId")
+	userId := c.Keys["userId"]
 
 	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
 		_ = c.Error(errors.BadRequestError)
 		return
 	} else {
-		note, err := d.service.GetNote(noteId, c.Request.Context())
+		note, err := d.service.GetNote(context.WithValue(c.Request.Context(), "userId", userId), noteId)
 		if err != nil {
 			_ = c.Error(err)
 			return
@@ -171,12 +183,13 @@ func (d *Delivery) ExportMd(c *gin.Context) {
 
 func (d *Delivery) ExportPdf(c *gin.Context) {
 	noteIdStr := c.Param("noteId")
+	userId := c.Keys["userId"]
 
 	if noteId, err := strconv.Atoi(noteIdStr); err != nil {
 		_ = c.Error(errors.BadRequestError)
 		return
 	} else {
-		note, err := d.service.GetNote(noteId, c.Request.Context())
+		note, err := d.service.GetNote(context.WithValue(c.Request.Context(), "userId", userId), noteId)
 		if err != nil {
 			_ = c.Error(err)
 			return
@@ -199,6 +212,7 @@ func (d *Delivery) ExportPdf(c *gin.Context) {
 func (d *Delivery) ImportMd(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["data"]
+	// userId := c.Keys["userId"]
 
 	if len(files) != 1 {
 		_ = c.Error(errors.BadRequestError)

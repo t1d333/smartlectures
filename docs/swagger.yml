@@ -21,6 +21,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NoteCreationResponse'
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
@@ -44,6 +56,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotesOverview'
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Ответ, если у пользователя не достаточно прав для совершения действия над объектом
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
@@ -70,6 +100,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Note'
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Ответ, если у пользователя не достаточно прав для совершения действия над объектом
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Ответ при запросе заметки с несуществующим ID
           content:
@@ -96,8 +144,26 @@ paths:
       responses:
         '204':
           description: Ответ при успешном запросе
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Ответ при попытке обновления не существующей заметки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Ответ, если у пользователя не достаточно прав для совершения действия над объектом
           content:
             application/json:
               schema:
@@ -127,6 +193,24 @@ paths:
       responses:
         '204':
           description: Ответ при успешном удалении заметки
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Ответ, если у пользователя не достаточно прав для совершения действия над объектом
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
@@ -152,6 +236,24 @@ paths:
               schema:
                 type: string
                 format: binary
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Ответ, если у пользователя не достаточно прав для совершения действия над объектом
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Ответ при запросе файла, которого не существует
           content:
@@ -184,8 +286,26 @@ paths:
               schema:
                 type: string
                 format: binary
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Ответ при запросе файла, которого не существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Ответ, если у пользователя не достаточно прав для совершения действия над объектом
           content:
             application/json:
               schema:
@@ -207,6 +327,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NoteSearchResponse'
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
@@ -234,6 +366,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DirCreationResponse'
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
       tags: [dirs]
   /dirs/{dirId}:
     get:
@@ -252,6 +402,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Dir'
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Ответ, если у пользователя не достаточно прав для совершения действия над объектом
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Ответ при ошибке на стороне сервера
           content:
@@ -282,6 +450,24 @@ paths:
       responses:
         '204':
           description: Ответ при успешном выполнении запроса
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Ответ, если у пользователя не достаточно прав для совершения действия над объектом
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
@@ -301,6 +487,24 @@ paths:
       responses:
         '204':
           description: Ответ при успешном удалении папки
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Ответ, если у пользователя не достаточно прав для совершения действия над объектом
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
@@ -320,6 +524,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DirsOverview'
+        '400':
+          description: Ответ при неккоректном запросе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Ответ при ошибке на стороне сервера
           content:
@@ -523,6 +739,99 @@ paths:
             schema:
               $ref: '#/components/schemas/SearchRequest'
       tags: [snippets]
+  /auth/login:
+    post:
+      summary: Авторизация пользователя
+      responses:
+        '204':
+          description: Ответ при успешном поиске
+        '400':
+          description: Ответ, при неверной почте или пароле
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      tags: [auth]
+  /auth/register:
+    put:
+      summary: Регистрация пользователя
+      responses:
+        '200':
+          description: Ответ при успешном поиске
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Snippet'
+        '409':
+          description: Ответ, если такой пользователь уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      tags: [auth]
+  /auth/logout:
+    delete:
+      summary: Удаление текущей авторизационной сессии
+      responses:
+        '204':
+          description: Ответ при успешном удалении сессии
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags: [auth]
+  /auth/me:
+    get:
+      summary: Получение информации о текущем пользователе
+      responses:
+        '200':
+          description: Ответ при успешном поиске
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '401':
+          description: Ответ для не авторизованного пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ответ при ошибке на стороне сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      tags: [auth]
 components:
   schemas:
     GetSnippetsResponse:
@@ -592,6 +901,78 @@ components:
           items:
             type: string
       required: [noteId, name, bodyHighlight, nameHighlight]
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Электронная почта
+          example: default@default.ru
+          x-isnullable: false
+        password:
+          type: string
+          description: Пароль
+          example: secret
+          x-isnullable: false
+      required: [email, password]
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Электронная почта
+          example: default@default.ru
+          x-isnullable: false
+        password:
+          type: string
+          description: Пароль
+          example: secret
+          x-isnullable: false
+        name:
+          type: string
+          description: имя пользователя
+          example: name
+          x-isnullable: false
+        surname:
+          type: string
+          description: фамилия пользователя
+          example: surname
+          x-isnullable: false
+        username:
+          type: string
+          description: ник пользователя
+          example: username
+          x-isnullable: false
+      required: [email, password, username]
+    UserInfo:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Электронная почта
+          example: default@default.ru
+          x-isnullable: false
+        password:
+          type: string
+          description: Пароль
+          example: secret
+          x-isnullable: false
+        name:
+          type: string
+          description: имя пользователя
+          example: name
+          x-isnullable: false
+        surname:
+          type: string
+          description: фамилия пользователя
+          example: surname
+          x-isnullable: false
+        username:
+          type: string
+          description: ник пользователя
+          example: username
+          x-isnullable: false
+      required: [email, password, username]
     SearchRequest:
       type: object
       properties:

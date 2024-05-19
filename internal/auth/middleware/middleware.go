@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -35,10 +34,8 @@ func NewAuthHandler(client auth.AuthServiceClient, logger logger.Logger) func(c 
 			_ = c.AbortWithError(http.StatusUnauthorized, autherrors.ErrUserUnauthorized)
 		}
 
-		fmt.Println("---------------", res.GetUserId(), "--------------")
-		
-		c.Set("userId", res.GetUserId())
-		
+		c.Set("userId", int(res.GetUserId()))
+
 		c.Next()
 	}
 }

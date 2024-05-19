@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -44,9 +45,7 @@ func (d *Delivery) Login(c *gin.Context) {
 		return
 	}
 
-	// c.ClientIP()
-
-	token, err := d.service.Login(c.Request.Context(), data)
+	token, err := d.service.Login(context.WithValue(c.Request.Context(), "client_ip", c.ClientIP()), data)
 	if err != nil {
 		_ = c.Error(err)
 		return

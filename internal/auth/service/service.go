@@ -59,9 +59,12 @@ func (s *Service) GetMe(ctx context.Context, session string) (models.User, error
 
 func (s *Service) Login(ctx context.Context, data authmodels.LoginRequest) (string, error) {
 	token := uuid.NewString()
+	clientIp := ctx.Value("client_ip").(string)
 
 	user, err := s.repository.GetUserByEmail(ctx, data.Email)
-	if err != nil {
+	if err != nil && errors.Is(err, autherrors.ErrUserNotFound){
+		return "", autherrors.ErrWrongPassword
+	} else if err != nil {
 		return "", fmt.Errorf("AuthService.Login(data: %v): %w", data, err)
 	}
 
@@ -74,7 +77,7 @@ func (s *Service) Login(ctx context.Context, data authmodels.LoginRequest) (stri
 	err = s.repository.AddNewSession(ctx, authmodels.SessionInfo{
 		UserId:    user.UserId,
 		Token:     token,
-		IPAddress: "",
+		IPAddress: clientIp,
 		Expire:    time.Now().Add(Expire),
 	})
 

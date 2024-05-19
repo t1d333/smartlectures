@@ -109,13 +109,19 @@ func (*Repository) SearchDir(ctx context.Context, query string) ([]int, error) {
 func (r *Repository) SearchNote(
 	ctx context.Context,
 	query string,
+	userId int,
 ) ([]models.NoteSearchItem, error) {
 	var buf bytes.Buffer
 
-	body := buildSearchNoteReqBody(query)
+	body := buildSearchNoteReqBody(query, userId)
 
 	if err := jsoniter.NewEncoder(&buf).Encode(&body); err != nil {
-		return []models.NoteSearchItem{}, fmt.Errorf("failed to create search request: %w", err)
+		return []models.NoteSearchItem{}, fmt.Errorf(
+			"storageRepostiory.SearchNote(query: %s, userId: %d): %w",
+			query,
+			userId,
+			err,
+		)
 	}
 
 	res, err := r.client.Search(
@@ -125,16 +131,25 @@ func (r *Repository) SearchNote(
 		r.client.Search.WithSource("noteId", "name"),
 		r.client.Search.WithTrackTotalHits(true),
 		r.client.Search.WithPretty(),
-	
 	)
 	if err != nil {
-		return []models.NoteSearchItem{}, fmt.Errorf("failed to make search request: %w", err)
+		return []models.NoteSearchItem{}, fmt.Errorf(
+			"storageRepostiory.SearchNote(query: %s, userId: %d): %w",
+			query,
+			userId,
+			err,
+		)
 	}
 
 	defer res.Body.Close()
 
 	if res.IsError() {
-		return []models.NoteSearchItem{}, fmt.Errorf("failed to search note")
+		return []models.NoteSearchItem{}, fmt.Errorf(
+			"storageRepostiory.SearchNote(query: %s, userId: %d) -> response: %v",
+			query,
+			userId,
+			res.String(),
+		)
 	}
 
 	var response NoteSearchResponse
