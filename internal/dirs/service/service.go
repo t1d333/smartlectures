@@ -46,7 +46,6 @@ func (s *Service) DeleteDir(ctx context.Context, dirId int) error {
 		return errors.ErrPermissionDenied
 	}
 
-	
 	err = s.repository.DeleteDir(dirId, ctx)
 	if err != nil {
 		return fmt.Errorf("failed to delete dir in dirs service: %w", err)
