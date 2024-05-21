@@ -759,6 +759,18 @@ paths:
             schema:
               $ref: '#/components/schemas/SearchRequest'
       tags: [snippets]
+  /preprocessor:
+     post:
+      summary: Обработка входящего изображения
+      responses:
+        '200':
+          description: Ответ при успешном поиске
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImagePreprocessRequest'
+      tags: [preprocessor]
   /auth/login:
     post:
       summary: Авторизация пользователя
@@ -975,6 +987,22 @@ components:
           example: username
           x-isnullable: false
       required: [email, password, username]
+    ImagePreprocessRequest:
+      type: object
+      properties:
+        image:
+          x-isnullable: false
+          type: string
+          format: binary
+        threshold:
+          type: number
+          example: 1
+          x-isnullable: false
+        apply_fft:
+          type: boolean
+          example: flase
+          x-isnullable: false
+      required: [image, threshold, apply_fft]
     UserInfo:
       type: object
       properties:
