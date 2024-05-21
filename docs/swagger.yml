@@ -771,9 +771,19 @@ paths:
                 $ref: '#/components/schemas/ImagePreprocessResponse'
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ImagePreprocessRequest'
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                threshold:
+                  description: Число в виде строки от 0 до 255
+                  type: string
+                apply_fft:
+                  description: True или False
+                  type: string
       tags: [preprocessor]
   /auth/login:
     post:
