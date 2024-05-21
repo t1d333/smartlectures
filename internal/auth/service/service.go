@@ -16,19 +16,27 @@ import (
 	"github.com/t1d333/smartlectures/internal/models"
 	"github.com/t1d333/smartlectures/pkg/logger"
 	"golang.org/x/crypto/bcrypt"
+
+	storage "github.com/t1d333/smartlectures/internal/storage"
 )
 
 const Expire = 24 * time.Hour
 
 type Service struct {
-	logger     logger.Logger
-	repository repository.Repository
+	logger        logger.Logger
+	repository    repository.Repository
+	storageClient storage.StorageClient
 }
 
-func New(logger logger.Logger, repo repository.Repository) auth.Service {
+func New(
+	logger logger.Logger,
+	repo repository.Repository,
+	storageClient storage.StorageClient,
+) auth.Service {
 	return &Service{
-		logger:     logger,
-		repository: repo,
+		logger:        logger,
+		repository:    repo,
+		storageClient: storageClient,
 	}
 }
 
@@ -62,7 +70,7 @@ func (s *Service) Login(ctx context.Context, data authmodels.LoginRequest) (stri
 	clientIp := ctx.Value("client_ip").(string)
 
 	user, err := s.repository.GetUserByEmail(ctx, data.Email)
-	if err != nil && errors.Is(err, autherrors.ErrUserNotFound){
+	if err != nil && errors.Is(err, autherrors.ErrUserNotFound) {
 		return "", autherrors.ErrWrongPassword
 	} else if err != nil {
 		return "", fmt.Errorf("AuthService.Login(data: %v): %w", data, err)
@@ -85,7 +93,6 @@ func (s *Service) Login(ctx context.Context, data authmodels.LoginRequest) (stri
 
 	return token, err
 }
-
 
 func (s *Service) IsAuthorized(ctx context.Context, session string) error {
 	tmp := strings.Split(session, "$")
@@ -156,6 +163,23 @@ func (s *Service) Register(
 			return models.User{}, fmt.Errorf("AuthService(data: %v): %w", data, err)
 		}
 
+		onboardNote, err := s.repository.GetOnboardNote(ctx, user.UserId)
+		if err != nil {
+			s.logger.Error("failed to get onboard note in AuthService.Register()", err)
+		}
+
+		_, err = s.storageClient.CreateNote(ctx, &storage.Note{
+			Id:        int32(onboardNote.NoteId),
+			Name:      onboardNote.Name,
+			Body:      onboardNote.Body,
+			ParentDir: int32(onboardNote.ParentDir),
+			UserId:    int32(user.UserId),
+		})
+
+		if err != nil {
+			s.logger.Error("failed to get onboard note in AuthService.Register()", err)
+		}
+		
 		return user, nil
 	}
 

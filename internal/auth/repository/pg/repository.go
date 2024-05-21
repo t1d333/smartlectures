@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -29,7 +30,15 @@ func (r *PostgresRepository) RegisterUser(
 	user models.User,
 ) (models.User, error) {
 	cmd := `INSERT INTO users(username, name, email, surname, password) VALUES ($1, $2, $3, $4, $5) RETURNING user_id;`
-	res := r.pool.QueryRow(ctx, cmd, user.Username, user.Name, user.Email, user.Surname, user.Password)
+	res := r.pool.QueryRow(
+		ctx,
+		cmd,
+		user.Username,
+		user.Name,
+		user.Email,
+		user.Surname,
+		user.Password,
+	)
 
 	if err := res.Scan(&user.UserId); err != nil {
 		return user, fmt.Errorf("PostgresRepository.RegisterUser(user: %v): %w", user, err)
@@ -38,7 +47,40 @@ func (r *PostgresRepository) RegisterUser(
 	return user, nil
 }
 
-func (r *PostgresRepository) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
+func (r *PostgresRepository) GetOnboardNote(
+	ctx context.Context,
+	userId int,
+) (models.Note, error) {
+	cmd := `SELECT note_id, name, body, created_at, last_update, parent_dir, user_id, repeated_num
+					FROM notes
+					WHERE user_id = $1 AND name=$2;`
+
+	note := models.Note{}
+	name := "Введение в приложение"
+
+	row := r.pool.QueryRow(ctx, cmd, userId, name)
+
+	parentDir := sql.NullInt32{}
+
+	if err := row.Scan(&note.NoteId, &note.Name, &note.Body, &note.CreatedAt, &note.LastUpdate, &parentDir, &note.UserId, &note.RepeatedNum); err != nil &&
+		!errors.Is(err, pgx.ErrNoRows) {
+		r.logger.Errorf("failed to get note in repository: %w", err)
+		return note, fmt.Errorf("failed to get note in repository: %w", err)
+	} else if err != nil && errors.Is(err, pgx.ErrNoRows) {
+		return note, fmt.Errorf("failed to get note in repository: %w", err)
+	}
+
+	if parentDir.Valid {
+		note.ParentDir = int(parentDir.Int32)
+	}
+
+	return note, nil
+}
+
+func (r *PostgresRepository) GetUserByEmail(
+	ctx context.Context,
+	email string,
+) (models.User, error) {
 	user := models.User{}
 
 	cmd := `SELECT user_id, username, name, surname, password FROM users WHERE email = $1`

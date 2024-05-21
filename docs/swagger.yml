@@ -764,7 +764,11 @@ paths:
       summary: Обработка входящего изображения
       responses:
         '200':
-          description: Ответ при успешном поиске
+          description: Ответ при успешной обработке
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImagePreprocessResponse'
       requestBody:
         content:
           application/json:
@@ -1003,6 +1007,18 @@ components:
           example: flase
           x-isnullable: false
       required: [image, threshold, apply_fft]
+    ImagePreprocessResponse:
+      type: object
+      properties:
+        image:
+          x-isnullable: false
+          type: string
+          format: binary
+        threshold:
+          type: number
+          example: 1
+          x-isnullable: false
+      required: [image, threshold]
     UserInfo:
       type: object
       properties:

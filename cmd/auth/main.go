@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/t1d333/smartlectures/cmd/auth/config"
 	"github.com/t1d333/smartlectures/internal/auth"
@@ -23,6 +24,8 @@ import (
 	"github.com/t1d333/smartlectures/internal/auth/service"
 	middl "github.com/t1d333/smartlectures/internal/middleware"
 	"github.com/t1d333/smartlectures/pkg/logger"
+
+	storage "github.com/t1d333/smartlectures/internal/storage"
 )
 
 func main() {
@@ -61,8 +64,22 @@ func main() {
 		logger.Fatal(err)
 	}
 
+	logger.Info("creating storage client...")
+	conn, err := grpc.Dial(
+		cfg.StorageAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		logger.Fatalf("failed to create storage client %s", err)
+	}
+	defer conn.Close()
+
+	logger.Info("storage client cratead successfully")
+
+	storageClient := storage.NewStorageClient(conn)
+
 	rep := repository.New(logger, redisClient, pool)
-	svc := service.New(logger, rep)
+	svc := service.New(logger, rep, storageClient)
 	del := delivery.NewDelivery(logger, router, svc)
 
 	del.RegisterHandler()

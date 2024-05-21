@@ -22,6 +22,7 @@ type Repository interface {
 	GetUserByEmail(ctx context.Context, email string) (models.User, error)
 	GetUserById(ctx context.Context, id int) (models.User, error)
 	GetSession(ctx context.Context, id int, token string) (authmodels.SessionInfo, error)
+	GetOnboardNote(ctx context.Context, userId int) (models.Note, error)
 }
 
 type RepositoryImpl struct {
@@ -58,6 +59,15 @@ func (r *RepositoryImpl) GetUserByEmail(ctx context.Context, email string) (mode
 	}
 
 	return user, nil
+}
+
+func (r *RepositoryImpl) GetOnboardNote(ctx context.Context, userId int) (models.Note, error) {
+	note, err := r.postgresRepo.GetOnboardNote(ctx, userId)
+	if err != nil {
+		return note, fmt.Errorf("AuthRepository.GetOnboardNote(userId: %d): %w", userId, err)
+	}
+
+	return note, nil
 }
 
 func New(logger logger.Logger, rdc *redis.Client, pgc *pgxpool.Pool) Repository {

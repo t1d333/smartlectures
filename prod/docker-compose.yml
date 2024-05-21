@@ -22,7 +22,7 @@ services:
     volumes:
       - ./configs/easytex.yml:/etc/easytex.yml
     networks: [backend]
-    depends_on: [postgres, redis, recognizer, auth, storage]
+    depends_on: [postgres, auth]
     restart: always
   preprocessor:
     build:
@@ -40,7 +40,7 @@ services:
     volumes:
       - ./configs/auth.yml:/etc/auth.yml
     restart: always
-    environment: ['CONFIG_PATH=/etc/auth.yml', 'DB_URL=${DB_URL}']
+    environment: ['CONFIG_PATH=/etc/auth.yml', 'DB_URL=${DB_URL}', 'STORAGE_ADDRESS=${STORAGE_ADDRESS}']
   images:
     container_name: images
     build:
